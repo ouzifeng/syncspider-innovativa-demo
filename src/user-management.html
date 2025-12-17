@@ -1,0 +1,718 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Clients | Innovativa</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📦%3C/text%3E%3C/svg%3E">
+  </head>
+  <body
+    x-data="{ page: 'clients', 'loaded': true, 'darkMode': false, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
+    x-init="
+         darkMode = JSON.parse(localStorage.getItem('darkMode'));
+         $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+    :class="{'dark bg-gray-900': darkMode === true}"
+  >
+    <!-- ===== Preloader Start ===== -->
+    <include src="./partials/preloader.html"></include>
+    <!-- ===== Preloader End ===== -->
+
+    <!-- ===== Page Wrapper Start ===== -->
+    <div class="flex h-screen overflow-hidden">
+      <!-- ===== Sidebar Start ===== -->
+      <include src="./partials/sidebar.html"></include>
+      <!-- ===== Sidebar End ===== -->
+
+      <!-- ===== Content Area Start ===== -->
+      <div
+        class="relative flex flex-col flex-1 overflow-x-hidden overflow-y-auto"
+      >
+        <!-- Small Device Overlay Start -->
+        <include src="./partials/overlay.html" />
+        <!-- Small Device Overlay End -->
+
+        <!-- ===== Header Start ===== -->
+        <include src="./partials/header.html" />
+        <!-- ===== Header End ===== -->
+
+        <!-- ===== Main Content Start ===== -->
+        <main>
+          <div class="p-4 mx-auto max-w-screen-2xl md:p-6 2xl:p-10">
+            <!-- Clients Component -->
+            <div
+              x-data="{
+                // State
+                clients: [
+                  {
+                    id: 'CLT001',
+                    name: 'GloveWorld Store',
+                    storeName: 'gloveworld-store',
+                    storeUrl: 'gloveworld-store.myshopify.com',
+                    platform: 'Shopify',
+                    contact: 'Sarah Chen',
+                    email: 'sarah@gloveworld.com',
+                    phone: '+1 415 555 0123',
+                    status: 'active',
+                    quotedProducts: 12,
+                    monthlyOrders: 847,
+                    monthlyRevenue: 4235.50,
+                    fulfillmentRate: 94.2,
+                    supplier: 'ShenZhen Global Trading',
+                    onboardedDate: '2024-08-15',
+                    notes: 'Main product: Winter gloves. Ships to US, UK, DE. High volume Q4.'
+                  },
+                  {
+                    id: 'CLT002',
+                    name: 'TechGadgets Pro',
+                    storeName: 'techgadgets-pro',
+                    storeUrl: 'techgadgets-pro.myshopify.com',
+                    platform: 'Shopify',
+                    contact: 'Mike Johnson',
+                    email: 'mike@techgadgetspro.com',
+                    phone: '+1 650 555 0456',
+                    status: 'active',
+                    quotedProducts: 28,
+                    monthlyOrders: 1523,
+                    monthlyRevenue: 8920.00,
+                    fulfillmentRate: 96.8,
+                    supplier: 'GuangZhou Electronics Co',
+                    onboardedDate: '2024-06-20',
+                    notes: 'Electronics accessories. USB cables, phone cases. Fast-moving SKUs.'
+                  },
+                  {
+                    id: 'CLT003',
+                    name: 'PetSupplies Direct',
+                    storeName: 'petsupplies-direct',
+                    storeUrl: 'petsupplies-direct.myshopify.com',
+                    platform: 'Shopify',
+                    contact: 'Emily Watson',
+                    email: 'emily@petsuppliesdirect.com',
+                    phone: '+44 20 7123 4567',
+                    status: 'active',
+                    quotedProducts: 45,
+                    monthlyOrders: 2341,
+                    monthlyRevenue: 12450.00,
+                    fulfillmentRate: 91.5,
+                    supplier: 'YiWu Pet Products Ltd',
+                    onboardedDate: '2024-03-10',
+                    notes: 'Pet toys, beds, accessories. UK-focused but expanding to EU.'
+                  },
+                  {
+                    id: 'CLT004',
+                    name: 'FitLife Gear',
+                    storeName: 'fitlife-gear',
+                    storeUrl: 'fitlife-gear.myshopify.com',
+                    platform: 'Shopify',
+                    contact: 'James Rodriguez',
+                    email: 'james@fitlifegear.com',
+                    phone: '+1 310 555 0789',
+                    status: 'active',
+                    quotedProducts: 18,
+                    monthlyOrders: 956,
+                    monthlyRevenue: 5680.25,
+                    fulfillmentRate: 97.3,
+                    supplier: 'DongGuan Sports Co',
+                    onboardedDate: '2024-09-01',
+                    notes: 'Fitness accessories, resistance bands, yoga mats. US market.'
+                  },
+                  {
+                    id: 'CLT005',
+                    name: 'HomeDecor Haven',
+                    storeName: 'homedecor-haven',
+                    storeUrl: 'homedecor-haven.myshopify.com',
+                    platform: 'Shopify',
+                    contact: 'Lisa Thompson',
+                    email: 'lisa@homedecorhaven.co.uk',
+                    phone: '+44 161 555 0234',
+                    status: 'active',
+                    quotedProducts: 67,
+                    monthlyOrders: 1876,
+                    monthlyRevenue: 15230.00,
+                    fulfillmentRate: 89.4,
+                    supplier: 'FoShan Home Goods',
+                    onboardedDate: '2024-01-15',
+                    notes: 'Large catalog. Wall art, cushions, decorative items. Ships worldwide.'
+                  },
+                  {
+                    id: 'CLT006',
+                    name: 'BabyEssentials Co',
+                    storeName: 'babyessentials-co',
+                    storeUrl: 'babyessentials-co.myshopify.com',
+                    platform: 'Shopify',
+                    contact: 'Anna Schmidt',
+                    email: 'anna@babyessentials.de',
+                    phone: '+49 30 555 0567',
+                    status: 'active',
+                    quotedProducts: 34,
+                    monthlyOrders: 1245,
+                    monthlyRevenue: 7890.50,
+                    fulfillmentRate: 95.1,
+                    supplier: 'NingBo Baby Products',
+                    onboardedDate: '2024-04-22',
+                    notes: 'Baby clothing, toys. Strict quality requirements. DE, AT, CH markets.'
+                  },
+                  {
+                    id: 'CLT007',
+                    name: 'OutdoorAdventure',
+                    storeName: 'outdoor-adventure',
+                    storeUrl: 'outdoor-adventure.myshopify.com',
+                    platform: 'Shopify',
+                    contact: 'Tom Wilson',
+                    email: 'tom@outdooradventure.com',
+                    phone: '+1 303 555 0890',
+                    status: 'paused',
+                    quotedProducts: 22,
+                    monthlyOrders: 0,
+                    monthlyRevenue: 0,
+                    fulfillmentRate: 0,
+                    supplier: 'HangZhou Outdoor Ltd',
+                    onboardedDate: '2024-07-08',
+                    notes: 'Seasonal business. Camping gear. Paused for winter, resuming March.'
+                  },
+                  {
+                    id: 'CLT008',
+                    name: 'BeautyBliss Store',
+                    storeName: 'beautybliss-store',
+                    storeUrl: 'beautybliss-store.myshopify.com',
+                    platform: 'Shopify',
+                    contact: 'Sophie Martin',
+                    email: 'sophie@beautybliss.fr',
+                    phone: '+33 1 55 55 01 23',
+                    status: 'active',
+                    quotedProducts: 89,
+                    monthlyOrders: 3456,
+                    monthlyRevenue: 24500.00,
+                    fulfillmentRate: 93.7,
+                    supplier: 'GuangZhou Beauty Supplies',
+                    onboardedDate: '2023-11-20',
+                    notes: 'High volume. Beauty tools, brushes, organizers. EU-wide shipping.'
+                  }
+                ],
+
+                // Filters
+                searchQuery: '',
+                filterStatus: 'all',
+
+                // Modals
+                clientDetailModal: false,
+                addClientModal: false,
+                selectedClient: null,
+
+                // Forms
+                newClient: {
+                  name: '',
+                  storeName: '',
+                  storeUrl: '',
+                  platform: 'Shopify',
+                  contact: '',
+                  email: '',
+                  phone: '',
+                  supplier: '',
+                  notes: '',
+                  status: 'active'
+                },
+
+                // Success message
+                successMessage: '',
+
+                // Methods
+                filteredClients() {
+                  return this.clients.filter(client => {
+                    if (this.filterStatus !== 'all' && client.status !== this.filterStatus) return false;
+                    if (this.searchQuery) {
+                      const query = this.searchQuery.toLowerCase();
+                      return client.name.toLowerCase().includes(query) ||
+                             client.contact.toLowerCase().includes(query) ||
+                             client.email.toLowerCase().includes(query) ||
+                             client.storeName.toLowerCase().includes(query) ||
+                             client.id.toLowerCase().includes(query);
+                    }
+                    return true;
+                  });
+                },
+
+                // Methods
+                viewClient(client) {
+                  this.selectedClient = JSON.parse(JSON.stringify(client));
+                  this.clientDetailModal = true;
+                },
+
+                saveClient() {
+                  const index = this.clients.findIndex(c => c.id === this.selectedClient.id);
+                  if (index > -1) {
+                    this.clients[index] = this.selectedClient;
+                  }
+                  this.clientDetailModal = false;
+                  this.showSuccess('Client updated successfully');
+                },
+
+                openAddClient() {
+                  this.newClient = {
+                    name: '',
+                    storeName: '',
+                    storeUrl: '',
+                    platform: 'Shopify',
+                    contact: '',
+                    email: '',
+                    phone: '',
+                    supplier: '',
+                    notes: '',
+                    status: 'active'
+                  };
+                  this.addClientModal = true;
+                },
+
+                addClient() {
+                  if (!this.newClient.name || !this.newClient.email || !this.newClient.storeUrl) {
+                    alert('Name, email, and store URL are required');
+                    return;
+                  }
+
+                  const newId = 'CLT' + String(this.clients.length + 1).padStart(3, '0');
+                  this.clients.push({
+                    id: newId,
+                    name: this.newClient.name,
+                    storeName: this.newClient.storeName || this.newClient.name.toLowerCase().replace(/\s+/g, '-'),
+                    storeUrl: this.newClient.storeUrl,
+                    platform: this.newClient.platform,
+                    contact: this.newClient.contact,
+                    email: this.newClient.email,
+                    phone: this.newClient.phone,
+                    status: this.newClient.status,
+                    quotedProducts: 0,
+                    monthlyOrders: 0,
+                    monthlyRevenue: 0,
+                    fulfillmentRate: 0,
+                    supplier: this.newClient.supplier,
+                    onboardedDate: new Date().toISOString().split('T')[0],
+                    notes: this.newClient.notes
+                  });
+
+                  this.addClientModal = false;
+                  this.showSuccess('Client onboarded successfully');
+                },
+
+                toggleClientStatus(client) {
+                  if (client.status === 'active') {
+                    client.status = 'paused';
+                  } else {
+                    client.status = 'active';
+                  }
+                  this.showSuccess('Client status updated');
+                },
+
+                showSuccess(message) {
+                  this.successMessage = message;
+                  setTimeout(() => { this.successMessage = ''; }, 3000);
+                },
+
+                formatDate(dateStr) {
+                  if (!dateStr || dateStr === 'Never') return 'Never';
+                  const date = new Date(dateStr);
+                  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                },
+
+                formatCurrency(amount) {
+                  return '$' + amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                },
+
+                getStatusClass(status) {
+                  if (status === 'active') return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
+                  if (status === 'paused') return 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400';
+                  return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400';
+                }
+              }"
+            >
+              <!-- Header -->
+              <div class="mb-6">
+                <h2 class="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
+                  Clients
+                </h2>
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                  Manage your e-commerce store clients and their fulfillment
+                </p>
+              </div>
+
+              <!-- Success Message -->
+              <template x-if="successMessage">
+                <div class="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-400">
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                  </svg>
+                  <span x-text="successMessage"></span>
+                </div>
+              </template>
+
+              <!-- Stats Overview -->
+              <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-5 border border-gray-200 dark:border-gray-700">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="text-sm text-gray-600 dark:text-gray-400">Total Clients</p>
+                      <h3 class="text-2xl font-bold text-gray-900 dark:text-white mt-1" x-text="clients.length"></h3>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                      <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-5 border border-gray-200 dark:border-gray-700">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="text-sm text-gray-600 dark:text-gray-400">Active</p>
+                      <h3 class="text-2xl font-bold text-gray-900 dark:text-white mt-1" x-text="clients.filter(c => c.status === 'active').length"></h3>
+                    </div>
+                    <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                      <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-5 border border-gray-200 dark:border-gray-700">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="text-sm text-gray-600 dark:text-gray-400">Total Products Quoted</p>
+                      <h3 class="text-2xl font-bold text-gray-900 dark:text-white mt-1" x-text="clients.reduce((sum, c) => sum + c.quotedProducts, 0)"></h3>
+                    </div>
+                    <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+                      <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-5 border border-gray-200 dark:border-gray-700">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="text-sm text-gray-600 dark:text-gray-400">Monthly Revenue</p>
+                      <h3 class="text-2xl font-bold text-gray-900 dark:text-white mt-1" x-text="formatCurrency(clients.reduce((sum, c) => sum + c.monthlyRevenue, 0))"></h3>
+                    </div>
+                    <div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center">
+                      <svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Actions Bar -->
+              <div class="mb-6 flex flex-wrap items-center gap-4 justify-between">
+                <div class="flex flex-wrap items-center gap-4">
+                  <!-- Search -->
+                  <div class="relative">
+                    <input
+                      type="text"
+                      x-model="searchQuery"
+                      placeholder="Search clients..."
+                      class="py-2 pl-10 pr-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                    />
+                    <svg class="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                  </div>
+
+                  <!-- Filter by Status -->
+                  <select
+                    x-model="filterStatus"
+                    class="py-2 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                  >
+                    <option value="all">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="paused">Paused</option>
+                  </select>
+                </div>
+
+                <div class="flex gap-3">
+                  <a
+                    href="invite-users.html"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors flex items-center gap-2"
+                  >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                    </svg>
+                    Onboard Client
+                  </a>
+                </div>
+              </div>
+
+              <!-- Clients Table -->
+              <div class="bg-white rounded-lg shadow dark:bg-gray-800 overflow-hidden">
+                <div class="overflow-x-auto">
+                  <table class="w-full">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                      <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Client</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Store</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Products</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Monthly Orders</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fulfillment</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                      <template x-for="client in filteredClients()" :key="client.id">
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer" @click="viewClient(client)">
+                          <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
+                                <span x-text="client.name.split(' ').map(n => n[0]).join('').substring(0, 2)"></span>
+                              </div>
+                              <div>
+                                <div class="font-medium text-gray-900 dark:text-white" x-text="client.name"></div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400" x-text="client.contact"></div>
+                              </div>
+                            </div>
+                          </td>
+                          <td class="px-6 py-4">
+                            <div class="flex items-center gap-2">
+                              <svg class="w-4 h-4 text-green-600" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm3.137 9.07L12.18 17.63c-.127.34-.538.506-.852.343l-3.35-1.74c-.314-.163-.433-.547-.27-.86l4.957-8.56c.127-.34.538-.506.852-.343l2.35 1.74c.314.163.433.547.27.86z"/>
+                              </svg>
+                              <div>
+                                <div class="text-sm text-gray-900 dark:text-white" x-text="client.storeName"></div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">.myshopify.com</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td class="px-6 py-4">
+                            <div class="text-sm font-medium text-gray-900 dark:text-white" x-text="client.quotedProducts + ' quoted'"></div>
+                          </td>
+                          <td class="px-6 py-4">
+                            <div class="text-sm font-medium text-gray-900 dark:text-white" x-text="client.monthlyOrders.toLocaleString()"></div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400" x-text="formatCurrency(client.monthlyRevenue)"></div>
+                          </td>
+                          <td class="px-6 py-4">
+                            <template x-if="client.fulfillmentRate > 0">
+                              <div>
+                                <div class="flex items-center gap-2">
+                                  <div class="w-16 h-2 bg-gray-200 rounded-full dark:bg-gray-700">
+                                    <div
+                                      class="h-2 rounded-full"
+                                      :class="client.fulfillmentRate >= 95 ? 'bg-green-500' : client.fulfillmentRate >= 90 ? 'bg-amber-500' : 'bg-red-500'"
+                                      :style="'width: ' + client.fulfillmentRate + '%'"
+                                    ></div>
+                                  </div>
+                                  <span class="text-sm font-medium text-gray-900 dark:text-white" x-text="client.fulfillmentRate + '%'"></span>
+                                </div>
+                              </div>
+                            </template>
+                            <template x-if="client.fulfillmentRate === 0">
+                              <span class="text-xs text-gray-400">N/A</span>
+                            </template>
+                          </td>
+                          <td class="px-6 py-4">
+                            <span
+                              class="px-3 py-1 text-xs font-medium rounded-full"
+                              :class="getStatusClass(client.status)"
+                              x-text="client.status.charAt(0).toUpperCase() + client.status.slice(1)"
+                            ></span>
+                          </td>
+                          <td class="px-6 py-4 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                              <a
+                                :href="'approver-dashboard.html?client=' + encodeURIComponent(client.name)"
+                                @click.stop
+                                class="px-3 py-1 text-sm text-blue-600 hover:bg-blue-50 rounded dark:text-blue-400 dark:hover:bg-blue-900/30"
+                              >
+                                Quotes
+                              </a>
+                              <button
+                                @click.stop="viewClient(client)"
+                                class="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded dark:text-gray-400 dark:hover:bg-gray-700"
+                              >
+                                View
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      </template>
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- Empty state -->
+                <template x-if="filteredClients().length === 0">
+                  <div class="px-6 py-12 text-center">
+                    <svg class="mx-auto w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                    </svg>
+                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">No clients found</p>
+                  </div>
+                </template>
+              </div>
+
+              <!-- Client Detail Modal -->
+              <template x-if="clientDetailModal && selectedClient">
+                <div class="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black bg-opacity-50">
+                  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                    <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                          <div class="w-14 h-14 rounded-full bg-gradient-to-br from-blue-400 to-purple-600 flex items-center justify-center text-white font-bold text-xl">
+                            <span x-text="selectedClient.name.split(' ').map(n => n[0]).join('').substring(0, 2)"></span>
+                          </div>
+                          <div>
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white" x-text="selectedClient.name"></h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                              <span x-text="selectedClient.storeUrl"></span> • <span x-text="selectedClient.id"></span>
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          @click="clientDetailModal = false"
+                          class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                        >
+                          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="p-6 space-y-6">
+                      <!-- Stats Row -->
+                      <div class="grid grid-cols-4 gap-4">
+                        <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-center">
+                          <p class="text-2xl font-bold text-gray-900 dark:text-white" x-text="selectedClient.quotedProducts"></p>
+                          <p class="text-xs text-gray-500 dark:text-gray-400">Quoted Products</p>
+                        </div>
+                        <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-center">
+                          <p class="text-2xl font-bold text-gray-900 dark:text-white" x-text="selectedClient.monthlyOrders.toLocaleString()"></p>
+                          <p class="text-xs text-gray-500 dark:text-gray-400">Monthly Orders</p>
+                        </div>
+                        <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-center">
+                          <p class="text-2xl font-bold text-gray-900 dark:text-white" x-text="formatCurrency(selectedClient.monthlyRevenue)"></p>
+                          <p class="text-xs text-gray-500 dark:text-gray-400">Monthly Revenue</p>
+                        </div>
+                        <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-center">
+                          <p class="text-2xl font-bold" :class="selectedClient.fulfillmentRate >= 95 ? 'text-green-600' : selectedClient.fulfillmentRate >= 90 ? 'text-amber-600' : 'text-red-600'" x-text="selectedClient.fulfillmentRate + '%'"></p>
+                          <p class="text-xs text-gray-500 dark:text-gray-400">Fulfillment Rate</p>
+                        </div>
+                      </div>
+
+                      <!-- Store Details -->
+                      <div class="grid grid-cols-2 gap-4">
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Store Name</label>
+                          <input
+                            type="text"
+                            x-model="selectedClient.storeName"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                          />
+                        </div>
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Store URL</label>
+                          <input
+                            type="text"
+                            x-model="selectedClient.storeUrl"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                          />
+                        </div>
+                      </div>
+
+                      <!-- Contact Details -->
+                      <div class="grid grid-cols-2 gap-4">
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Contact Name</label>
+                          <input
+                            type="text"
+                            x-model="selectedClient.contact"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                          />
+                        </div>
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+                          <input
+                            type="email"
+                            x-model="selectedClient.email"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                          />
+                        </div>
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone</label>
+                          <input
+                            type="text"
+                            x-model="selectedClient.phone"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                          />
+                        </div>
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Supplier</label>
+                          <input
+                            type="text"
+                            x-model="selectedClient.supplier"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Onboarded</label>
+                        <p class="text-sm text-gray-600 dark:text-gray-400" x-text="formatDate(selectedClient.onboardedDate)"></p>
+                      </div>
+
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes</label>
+                        <textarea
+                          x-model="selectedClient.notes"
+                          rows="3"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                          placeholder="Notes about this client..."
+                        ></textarea>
+                      </div>
+
+                      <!-- Quick Actions -->
+                      <div class="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <a
+                          :href="'approver-dashboard.html?client=' + encodeURIComponent(selectedClient.name)"
+                          class="flex-1 px-4 py-2 text-center text-white bg-blue-600 rounded-lg hover:bg-blue-700 font-medium"
+                        >
+                          View Quotations
+                        </a>
+                        <button
+                          @click.stop="toggleClientStatus(selectedClient)"
+                          class="px-4 py-2 rounded-lg font-medium transition-colors"
+                          :class="selectedClient.status === 'active' ? 'text-amber-700 bg-amber-100 hover:bg-amber-200' : 'text-green-700 bg-green-100 hover:bg-green-200'"
+                          x-text="selectedClient.status === 'active' ? 'Pause Client' : 'Activate Client'"
+                        ></button>
+                      </div>
+                    </div>
+                    <div class="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
+                      <button
+                        @click="clientDetailModal = false"
+                        class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        @click="saveClient()"
+                        class="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                      >
+                        Save Changes
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </template>
+
+            </div>
+          </div>
+        </main>
+        <!-- ===== Main Content End ===== -->
+      </div>
+      <!-- ===== Content Area End ===== -->
+    </div>
+    <!-- ===== Page Wrapper End ===== -->
+  </body>
+</html>

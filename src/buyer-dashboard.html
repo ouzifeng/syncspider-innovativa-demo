@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Dashboard | Innovativa Client Portal</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📦%3C/text%3E%3C/svg%3E">
+  </head>
+  <body
+    x-data="{
+      page: 'buyerDashboard',
+      'loaded': true,
+      'darkMode': false,
+      'pendingQuotes': 2,
+      'user': {
+        name: 'Emma Thompson',
+        email: 'emma@luxebeauty.co.uk',
+        company: 'Luxe Beauty Co',
+        role: 'Owner',
+        shopifyStore: 'luxebeauty.myshopify.com'
+      },
+      'stats': {
+        quotedProducts: 24,
+        pendingQuotes: 2,
+        ordersThisMonth: 156,
+        totalCOGS: 4280.50,
+        totalRevenue: 12450.00,
+        profit: 8169.50
+      },
+      'recentQuotes': [
+        { id: 'QR-2025-0042', product: 'Silk Hair Serum 50ml', sku: 'SHS-50', status: 'quoted', requestedDate: '2025-01-18', price: 3.20 },
+        { id: 'QR-2025-0041', product: 'Vitamin C Face Cream', sku: 'VFC-100', status: 'pending', requestedDate: '2025-01-20', price: null },
+        { id: 'QR-2025-0040', product: 'Retinol Night Serum', sku: 'RNS-30', status: 'pending', requestedDate: '2025-01-20', price: null },
+        { id: 'QR-2025-0039', product: 'Hyaluronic Acid Mask', sku: 'HAM-5PK', status: 'quoted', requestedDate: '2025-01-15', price: 2.85 }
+      ],
+      'recentOrders': [
+        { id: 'ORD-78234', date: '2025-01-20', items: 3, revenue: 89.97, cogs: 24.60, profit: 65.37, customer: 'Sarah M.' },
+        { id: 'ORD-78231', date: '2025-01-20', items: 1, revenue: 34.99, cogs: 8.50, profit: 26.49, customer: 'James K.' },
+        { id: 'ORD-78228', date: '2025-01-19', items: 5, revenue: 124.95, cogs: 32.00, profit: 92.95, customer: 'Lisa P.' },
+        { id: 'ORD-78225', date: '2025-01-19', items: 2, revenue: 59.98, cogs: 15.40, profit: 44.58, customer: 'Mike D.' }
+      ],
+      getStatusColor(status) {
+        if (status === 'quoted') return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400';
+        if (status === 'pending') return 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400';
+        return 'bg-gray-50 text-gray-700 dark:bg-gray-900/20 dark:text-gray-400';
+      },
+      formatCurrency(amount) {
+        return '£' + amount.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      },
+      formatPrice(amount) {
+        if (amount === null) return '—';
+        return '$' + amount.toFixed(2);
+      }
+    }"
+    x-init="
+         darkMode = JSON.parse(localStorage.getItem('darkMode'));
+         $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+    :class="{'dark bg-gray-900': darkMode === true}"
+  >
+    <!-- ===== Preloader Start ===== -->
+    <include src="./partials/preloader.html"></include>
+    <!-- ===== Preloader End ===== -->
+
+    <!-- ===== Page Container ===== -->
+    <div class="flex min-h-screen flex-col bg-gray-50 dark:bg-gray-900">
+      <!-- ===== Top Navigation Bar ===== -->
+      <include src="./partials/buyer-nav.html"></include>
+
+      <!-- ===== Main Content ===== -->
+      <main class="flex-1 py-8">
+        <div class="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
+          <!-- Welcome Section -->
+          <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+              Welcome back, <span x-text="user.name.split(' ')[0]"></span>!
+            </h1>
+            <p class="mt-2 text-gray-600 dark:text-gray-400">
+              Here's an overview of your sourcing and orders for <span x-text="user.company" class="font-medium"></span>
+            </p>
+          </div>
+
+          <!-- Alert: Pending Quotes -->
+          <div x-show="stats.pendingQuotes > 0" class="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/20">
+            <div class="flex items-center gap-3">
+              <div class="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-800">
+                <svg class="h-5 w-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div class="flex-1">
+                <p class="font-medium text-amber-800 dark:text-amber-200">
+                  <span x-text="stats.pendingQuotes"></span> quote request<span x-show="stats.pendingQuotes > 1">s</span> pending
+                </p>
+                <p class="text-sm text-amber-700 dark:text-amber-300">We're working on pricing for your products</p>
+              </div>
+              <a href="buyer-products.html?filter=pending" class="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700">
+                View Pending
+              </a>
+            </div>
+          </div>
+
+          <!-- Stats Cards -->
+          <div class="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <!-- Card 1: Quoted Products -->
+            <div class="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+              <div class="mb-4 flex items-center justify-between">
+                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-900/20">
+                  <svg class="h-6 w-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                  </svg>
+                </div>
+              </div>
+              <p class="text-sm text-gray-500 dark:text-gray-400">Quoted Products</p>
+              <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white" x-text="stats.quotedProducts"></p>
+              <p class="mt-1 text-xs text-gray-400">Products with pricing</p>
+            </div>
+
+            <!-- Card 2: Pending Quotes -->
+            <div class="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+              <div class="mb-4 flex items-center justify-between">
+                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-900/20">
+                  <svg class="h-6 w-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+              </div>
+              <p class="text-sm text-gray-500 dark:text-gray-400">Pending Quotes</p>
+              <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white" x-text="stats.pendingQuotes"></p>
+              <p class="mt-1 text-xs text-gray-400">Awaiting pricing</p>
+            </div>
+
+            <!-- Card 3: Orders This Month -->
+            <div class="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+              <div class="mb-4 flex items-center justify-between">
+                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-900/20">
+                  <svg class="h-6 w-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                  </svg>
+                </div>
+              </div>
+              <p class="text-sm text-gray-500 dark:text-gray-400">Orders This Month</p>
+              <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white" x-text="stats.ordersThisMonth"></p>
+              <p class="mt-1 text-xs text-gray-400">From your Shopify store</p>
+            </div>
+
+            <!-- Card 4: Your Profit -->
+            <div class="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+              <div class="mb-4 flex items-center justify-between">
+                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-900/20">
+                  <svg class="h-6 w-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                  </svg>
+                </div>
+              </div>
+              <p class="text-sm text-gray-500 dark:text-gray-400">Your Profit (MTD)</p>
+              <p class="mt-2 text-3xl font-bold text-emerald-600 dark:text-emerald-400" x-text="formatCurrency(stats.profit)"></p>
+              <p class="mt-1 text-xs text-gray-400">Revenue - COGS</p>
+            </div>
+          </div>
+
+          <!-- Two Column Layout -->
+          <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <!-- Recent Quotes -->
+            <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+              <div class="flex items-center justify-between border-b border-gray-200 p-6 dark:border-gray-700">
+                <div>
+                  <h2 class="text-xl font-bold text-gray-900 dark:text-white">Recent Quotes</h2>
+                  <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Your product pricing requests</p>
+                </div>
+                <a href="buyer-products.html" class="text-sm font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300">
+                  View All →
+                </a>
+              </div>
+              <div class="p-6">
+                <div class="space-y-4">
+                  <template x-for="quote in recentQuotes" :key="quote.id">
+                    <div class="flex items-center justify-between rounded-lg border border-gray-200 p-4 transition-colors hover:border-emerald-300 dark:border-gray-700 dark:hover:border-emerald-600">
+                      <div class="flex-1">
+                        <div class="mb-1 flex items-center gap-3">
+                          <p class="font-semibold text-gray-900 dark:text-white" x-text="quote.product"></p>
+                          <span class="rounded-full px-2 py-1 text-xs font-medium capitalize" :class="getStatusColor(quote.status)" x-text="quote.status"></span>
+                        </div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                          SKU: <span x-text="quote.sku"></span> • Requested: <span x-text="quote.requestedDate"></span>
+                        </p>
+                      </div>
+                      <div class="text-right">
+                        <p class="text-lg font-bold" :class="quote.price ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400'" x-text="formatPrice(quote.price)"></p>
+                        <p class="text-xs text-gray-400" x-show="quote.price">per unit</p>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recent Orders -->
+            <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+              <div class="flex items-center justify-between border-b border-gray-200 p-6 dark:border-gray-700">
+                <div>
+                  <h2 class="text-xl font-bold text-gray-900 dark:text-white">Recent Orders</h2>
+                  <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">From your Shopify store</p>
+                </div>
+                <a href="buyer-orders.html" class="text-sm font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300">
+                  View All →
+                </a>
+              </div>
+              <div class="p-6">
+                <div class="space-y-4">
+                  <template x-for="order in recentOrders" :key="order.id">
+                    <div class="flex items-center justify-between rounded-lg border border-gray-200 p-4 transition-colors hover:border-emerald-300 dark:border-gray-700 dark:hover:border-emerald-600">
+                      <div class="flex-1">
+                        <div class="mb-1 flex items-center gap-3">
+                          <p class="font-semibold text-gray-900 dark:text-white" x-text="order.id"></p>
+                        </div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                          <span x-text="order.items"></span> items • <span x-text="order.customer"></span> • <span x-text="order.date"></span>
+                        </p>
+                      </div>
+                      <div class="text-right">
+                        <p class="text-sm text-gray-500">
+                          Revenue: <span class="font-medium text-gray-700 dark:text-gray-300" x-text="formatCurrency(order.revenue)"></span>
+                        </p>
+                        <p class="text-sm text-gray-500">
+                          COGS: <span class="font-medium text-amber-600 dark:text-amber-400" x-text="formatCurrency(order.cogs)"></span>
+                        </p>
+                        <p class="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                          Profit: <span x-text="formatCurrency(order.profit)"></span>
+                        </p>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- COGS Summary Card -->
+          <div class="mt-6 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+            <h3 class="mb-4 text-lg font-bold text-gray-900 dark:text-white">Month-to-Date Summary</h3>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div class="rounded-lg bg-gray-50 p-4 dark:bg-gray-700">
+                <p class="text-sm text-gray-500 dark:text-gray-400">Total Revenue</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white" x-text="formatCurrency(stats.totalRevenue)"></p>
+              </div>
+              <div class="rounded-lg bg-amber-50 p-4 dark:bg-amber-900/20">
+                <p class="text-sm text-amber-700 dark:text-amber-400">Total COGS</p>
+                <p class="text-2xl font-bold text-amber-600 dark:text-amber-400" x-text="formatCurrency(stats.totalCOGS)"></p>
+              </div>
+              <div class="rounded-lg bg-emerald-50 p-4 dark:bg-emerald-900/20">
+                <p class="text-sm text-emerald-700 dark:text-emerald-400">Your Profit</p>
+                <p class="text-2xl font-bold text-emerald-600 dark:text-emerald-400" x-text="formatCurrency(stats.profit)"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- ===== Footer ===== -->
+      <footer class="mt-8 border-t border-gray-200 bg-white py-6 dark:border-gray-700 dark:bg-gray-800">
+        <div class="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
+          <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              © 2025 Innovativa. All rights reserved.
+            </p>
+            <div class="flex items-center gap-6 text-sm">
+              <a href="#" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+                Help & Support
+              </a>
+              <a href="#" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+                Terms & Conditions
+              </a>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+    <!-- ===== Page Container End ===== -->
+  </body>
+</html>

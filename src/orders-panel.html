@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Customer Orders | Innovativa</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📦%3C/text%3E%3C/svg%3E">
+  </head>
+  <body
+    x-data="{ page: 'customerOrders', 'loaded': true, 'darkMode': false, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
+    x-init="
+         darkMode = JSON.parse(localStorage.getItem('darkMode'));
+         $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+    :class="{'dark bg-gray-900': darkMode === true}"
+  >
+    <!-- ===== Preloader Start ===== -->
+    <include src="./partials/preloader.html"></include>
+    <!-- ===== Preloader End ===== -->
+
+    <!-- ===== Page Wrapper Start ===== -->
+    <div class="flex h-screen overflow-hidden">
+      <!-- ===== Sidebar Start ===== -->
+      <include src="./partials/sidebar.html"></include>
+      <!-- ===== Sidebar End ===== -->
+
+      <!-- ===== Content Area Start ===== -->
+      <div
+        class="relative flex flex-col flex-1 overflow-x-hidden overflow-y-auto"
+      >
+        <!-- Small Device Overlay Start -->
+        <include src="./partials/overlay.html" />
+        <!-- Small Device Overlay End -->
+
+        <!-- ===== Header Start ===== -->
+        <include src="./partials/header.html" />
+        <!-- ===== Header End ===== -->
+
+        <!-- ===== Main Content Start ===== -->
+        <main>
+          <div class="p-4 mx-auto max-w-screen-2xl md:p-6 2xl:p-10">
+            <!-- Fulfillment Panel Component -->
+            <div
+              x-data="{
+                // Filters
+                searchQuery: '',
+                filterClient: 'all',
+                filterStatus: 'all',
+                filterDateRange: 'week',
+
+                // Modal state
+                orderDetailsModal: false,
+                selectedOrder: null,
+
+                // Success message
+                successMessage: '',
+
+                // Orders data - from Shopify stores
+                // supplierCost = what we pay China, clientCost = what client pays us (their COGS), sellingPrice = what end customer pays
+                orders: [
+                  {
+                    id: 'ORD-4521',
+                    shopifyId: '#1089',
+                    client: 'GloveWorld Store',
+                    customer: 'John Smith',
+                    country: 'US',
+                    orderDate: '2025-01-15',
+                    items: [
+                      { sku: 'WG-PRO-001', name: 'Winter Gloves Pro', quantity: 3, supplierCost: 6.40, clientCost: 8.50, sellingPrice: 24.99 }
+                    ],
+                    totalSupplierCost: 19.20,
+                    totalClientCost: 25.50,
+                    totalRevenue: 74.97,
+                    status: 'pending',
+                    supplierStatus: 'not_ordered',
+                    trackingNumber: null
+                  },
+                  {
+                    id: 'ORD-4520',
+                    shopifyId: '#1088',
+                    client: 'GloveWorld Store',
+                    customer: 'Sarah Johnson',
+                    country: 'UK',
+                    orderDate: '2025-01-15',
+                    items: [
+                      { sku: 'WG-PRO-001', name: 'Winter Gloves Pro', quantity: 1, supplierCost: 7.00, clientCost: 9.20, sellingPrice: 26.99 }
+                    ],
+                    totalSupplierCost: 7.00,
+                    totalClientCost: 9.20,
+                    totalRevenue: 26.99,
+                    status: 'processing',
+                    supplierStatus: 'ordered',
+                    trackingNumber: null
+                  },
+                  {
+                    id: 'ORD-4519',
+                    shopifyId: '#3456',
+                    client: 'TechGadgets Pro',
+                    customer: 'Mike Chen',
+                    country: 'US',
+                    orderDate: '2025-01-15',
+                    items: [
+                      { sku: 'USB-HUB-7', name: 'USB-C Hub 7-in-1', quantity: 1, supplierCost: 9.00, clientCost: 12.00, sellingPrice: 39.99 },
+                      { sku: 'USB-CABLE-3', name: 'USB-C Cable 3-pack', quantity: 2, supplierCost: 2.60, clientCost: 3.50, sellingPrice: 14.99 }
+                    ],
+                    totalSupplierCost: 14.20,
+                    totalClientCost: 19.00,
+                    totalRevenue: 69.97,
+                    status: 'shipped',
+                    supplierStatus: 'shipped',
+                    trackingNumber: 'YT2025011512345'
+                  },
+                  {
+                    id: 'ORD-4518',
+                    shopifyId: '#7823',
+                    client: 'PetSupplies Direct',
+                    customer: 'Emma Watson',
+                    country: 'UK',
+                    orderDate: '2025-01-14',
+                    items: [
+                      { sku: 'PDB-L-001', name: 'Premium Dog Bed - Large', quantity: 1, supplierCost: 17.00, clientCost: 22.50, sellingPrice: 79.99 }
+                    ],
+                    totalSupplierCost: 17.00,
+                    totalClientCost: 22.50,
+                    totalRevenue: 79.99,
+                    status: 'shipped',
+                    supplierStatus: 'shipped',
+                    trackingNumber: 'YT2025011467890'
+                  },
+                  {
+                    id: 'ORD-4517',
+                    shopifyId: '#7822',
+                    client: 'PetSupplies Direct',
+                    customer: 'James Wilson',
+                    country: 'DE',
+                    orderDate: '2025-01-14',
+                    items: [
+                      { sku: 'PDB-L-001', name: 'Premium Dog Bed - Large', quantity: 2, supplierCost: 18.00, clientCost: 24.00, sellingPrice: 84.99 }
+                    ],
+                    totalSupplierCost: 36.00,
+                    totalClientCost: 48.00,
+                    totalRevenue: 169.98,
+                    status: 'delivered',
+                    supplierStatus: 'delivered',
+                    trackingNumber: 'YT2025011423456'
+                  },
+                  {
+                    id: 'ORD-4516',
+                    shopifyId: '#9012',
+                    client: 'BeautyBliss Store',
+                    customer: 'Sophie Martin',
+                    country: 'FR',
+                    orderDate: '2025-01-14',
+                    items: [
+                      { sku: 'MBS-12-PRO', name: 'Makeup Brush Set - 12pc', quantity: 3, supplierCost: 5.50, clientCost: 7.50, sellingPrice: 34.99 }
+                    ],
+                    totalSupplierCost: 16.50,
+                    totalClientCost: 22.50,
+                    totalRevenue: 104.97,
+                    status: 'processing',
+                    supplierStatus: 'ordered',
+                    trackingNumber: null
+                  },
+                  {
+                    id: 'ORD-4515',
+                    shopifyId: '#5678',
+                    client: 'FitLife Gear',
+                    customer: 'Carlos Rodriguez',
+                    country: 'US',
+                    orderDate: '2025-01-13',
+                    items: [
+                      { sku: 'RB-SET-5', name: 'Resistance Band Set', quantity: 5, supplierCost: 7.00, clientCost: 9.50, sellingPrice: 29.99 }
+                    ],
+                    totalSupplierCost: 35.00,
+                    totalClientCost: 47.50,
+                    totalRevenue: 149.95,
+                    status: 'delivered',
+                    supplierStatus: 'delivered',
+                    trackingNumber: 'YT2025011334567'
+                  },
+                  {
+                    id: 'ORD-4514',
+                    shopifyId: '#2345',
+                    client: 'HomeDecor Haven',
+                    customer: 'Lisa Thompson',
+                    country: 'UK',
+                    orderDate: '2025-01-13',
+                    items: [
+                      { sku: 'LSL-100', name: 'LED String Lights - 100ft', quantity: 1, supplierCost: 10.50, clientCost: 14.00, sellingPrice: 49.99 }
+                    ],
+                    totalSupplierCost: 10.50,
+                    totalClientCost: 14.00,
+                    totalRevenue: 49.99,
+                    status: 'delivered',
+                    supplierStatus: 'delivered',
+                    trackingNumber: 'YT2025011245678'
+                  }
+                ],
+
+                get allClients() {
+                  return [...new Set(this.orders.map(o => o.client))];
+                },
+
+                get filteredOrders() {
+                  return this.orders.filter(order => {
+                    if (this.filterClient !== 'all' && order.client !== this.filterClient) return false;
+                    if (this.filterStatus !== 'all' && order.status !== this.filterStatus) return false;
+                    if (this.searchQuery) {
+                      const query = this.searchQuery.toLowerCase();
+                      return order.id.toLowerCase().includes(query) ||
+                             order.shopifyId.toLowerCase().includes(query) ||
+                             order.customer.toLowerCase().includes(query) ||
+                             order.client.toLowerCase().includes(query);
+                    }
+                    return true;
+                  });
+                },
+
+                get totalOrders() {
+                  return this.orders.length;
+                },
+
+                get fulfilledOrders() {
+                  return this.orders.filter(o => o.status === 'delivered').length;
+                },
+
+                get fulfillmentRate() {
+                  return this.totalOrders > 0 ? Math.round((this.fulfilledOrders / this.totalOrders) * 100) : 0;
+                },
+
+                get totalSupplierCost() {
+                  return this.orders.reduce((sum, o) => sum + o.totalSupplierCost, 0);
+                },
+
+                get totalClientCost() {
+                  return this.orders.reduce((sum, o) => sum + o.totalClientCost, 0);
+                },
+
+                get totalRevenue() {
+                  return this.orders.reduce((sum, o) => sum + o.totalRevenue, 0);
+                },
+
+                get ourProfit() {
+                  return this.totalClientCost - this.totalSupplierCost;
+                },
+
+                get clientProfit() {
+                  return this.totalRevenue - this.totalClientCost;
+                },
+
+                formatCurrency(amount) {
+                  return '$' + amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                },
+
+                formatDate(dateStr) {
+                  const date = new Date(dateStr);
+                  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                },
+
+                getStatusClass(status) {
+                  if (status === 'pending') return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300';
+                  if (status === 'processing') return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400';
+                  if (status === 'shipped') return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
+                  if (status === 'delivered') return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
+                  return 'bg-gray-100 text-gray-700';
+                },
+
+                getSupplierStatusLabel(status) {
+                  const labels = {
+                    'not_ordered': 'Not Ordered',
+                    'ordered': 'Ordered',
+                    'shipped': 'Shipped',
+                    'delivered': 'Delivered'
+                  };
+                  return labels[status] || status;
+                },
+
+                getCountryFlag(code) {
+                  const flags = { 'US': '🇺🇸', 'UK': '🇬🇧', 'DE': '🇩🇪', 'FR': '🇫🇷', 'IT': '🇮🇹', 'ES': '🇪🇸' };
+                  return flags[code] || code;
+                },
+
+                viewOrderDetails(order) {
+                  this.selectedOrder = JSON.parse(JSON.stringify(order));
+                  this.orderDetailsModal = true;
+                },
+
+                updateOrderStatus(order, newStatus) {
+                  const index = this.orders.findIndex(o => o.id === order.id);
+                  if (index > -1) {
+                    this.orders[index].status = newStatus;
+                    this.orders[index].supplierStatus = newStatus;
+                    this.selectedOrder.status = newStatus;
+                    this.selectedOrder.supplierStatus = newStatus;
+                  }
+                  this.showSuccess('Order status updated to ' + newStatus);
+                },
+
+                showSuccess(message) {
+                  this.successMessage = message;
+                  setTimeout(() => { this.successMessage = ''; }, 3000);
+                },
+
+                exportOrders() {
+                  alert('Exporting ' + this.filteredOrders.length + ' orders to CSV...');
+                }
+              }"
+            >
+              <!-- Header -->
+              <div class="mb-6">
+                <h2 class="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
+                  Fulfillment
+                </h2>
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                  Track orders and supplier fulfillment status
+                </p>
+              </div>
+
+              <!-- Success Message -->
+              <template x-if="successMessage">
+                <div class="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-400">
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                  </svg>
+                  <span x-text="successMessage"></span>
+                </div>
+              </template>
+
+              <!-- Stats Overview -->
+              <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-5 border border-gray-200 dark:border-gray-700">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="text-sm text-gray-600 dark:text-gray-400">Orders</p>
+                      <h3 class="text-2xl font-bold text-gray-900 dark:text-white mt-1" x-text="totalOrders"></h3>
+                    </div>
+                    <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                      <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-2" x-text="fulfilledOrders + ' fulfilled (' + fulfillmentRate + '%)'"></p>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-5 border border-gray-200 dark:border-gray-700">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="text-sm text-amber-600 dark:text-amber-400">Our Cost</p>
+                      <h3 class="text-2xl font-bold text-gray-900 dark:text-white mt-1" x-text="formatCurrency(totalSupplierCost)"></h3>
+                    </div>
+                    <div class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center">
+                      <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">What we pay supplier</p>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-5 border border-gray-200 dark:border-gray-700">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="text-sm text-green-600 dark:text-green-400">Client COGS</p>
+                      <h3 class="text-2xl font-bold text-gray-900 dark:text-white mt-1" x-text="formatCurrency(totalClientCost)"></h3>
+                    </div>
+                    <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                      <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">What client pays us</p>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-5 border border-gray-200 dark:border-gray-700">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="text-sm text-gray-600 dark:text-gray-400">Store Revenue</p>
+                      <h3 class="text-2xl font-bold text-gray-900 dark:text-white mt-1" x-text="formatCurrency(totalRevenue)"></h3>
+                    </div>
+                    <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                      <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">End customer paid</p>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-5 border border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="text-sm text-blue-600 dark:text-blue-400 font-medium">Our Profit</p>
+                      <h3 class="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1" x-text="formatCurrency(ourProfit)"></h3>
+                    </div>
+                    <div class="w-10 h-10 bg-blue-200 dark:bg-blue-800/50 rounded-lg flex items-center justify-center">
+                      <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <p class="text-xs text-blue-600/70 dark:text-blue-400/70 mt-2">Client COGS - Our Cost</p>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-5 border border-gray-200 dark:border-gray-700">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="text-sm text-gray-600 dark:text-gray-400">Client Profit</p>
+                      <h3 class="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1" x-text="formatCurrency(clientProfit)"></h3>
+                    </div>
+                    <div class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center">
+                      <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Revenue - Client COGS</p>
+                </div>
+              </div>
+
+              <!-- Filters Bar -->
+              <div class="mb-6 flex flex-wrap items-center gap-4 justify-between">
+                <div class="flex flex-wrap items-center gap-4">
+                  <!-- Search -->
+                  <div class="relative">
+                    <input
+                      type="text"
+                      x-model="searchQuery"
+                      placeholder="Search orders..."
+                      class="py-2 pl-10 pr-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                    />
+                    <svg class="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                  </div>
+
+                  <!-- Filter by Client -->
+                  <select
+                    x-model="filterClient"
+                    class="py-2 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                  >
+                    <option value="all">All Clients</option>
+                    <template x-for="client in allClients" :key="client">
+                      <option :value="client" x-text="client"></option>
+                    </template>
+                  </select>
+
+                  <!-- Filter by Status -->
+                  <select
+                    x-model="filterStatus"
+                    class="py-2 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                  >
+                    <option value="all">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="processing">Processing</option>
+                    <option value="shipped">Shipped</option>
+                    <option value="delivered">Delivered</option>
+                  </select>
+                </div>
+
+                <div class="flex gap-3">
+                  <button
+                    @click="exportOrders()"
+                    class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium transition-colors flex items-center gap-2"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    Export CSV
+                  </button>
+                </div>
+              </div>
+
+              <!-- Orders Table -->
+              <div class="bg-white rounded-lg shadow dark:bg-gray-800 overflow-hidden">
+                <div class="overflow-x-auto">
+                  <table class="w-full">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                      <tr>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Order</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Client</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Customer</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-amber-600 dark:text-amber-400 uppercase tracking-wider">Our Cost</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-green-600 dark:text-green-400 uppercase tracking-wider">Client COGS</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-blue-600 dark:text-blue-400 uppercase tracking-wider">Our Profit</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Revenue</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                      <template x-for="order in filteredOrders" :key="order.id">
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer" @click="viewOrderDetails(order)">
+                          <td class="px-4 py-4">
+                            <div class="font-medium text-gray-900 dark:text-white" x-text="order.id"></div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400" x-text="'Shopify ' + order.shopifyId"></div>
+                          </td>
+                          <td class="px-4 py-4">
+                            <div class="text-sm font-medium text-gray-900 dark:text-white" x-text="order.client"></div>
+                          </td>
+                          <td class="px-4 py-4">
+                            <div class="flex items-center gap-2">
+                              <span x-text="getCountryFlag(order.country)"></span>
+                              <div>
+                                <div class="text-sm text-gray-900 dark:text-white" x-text="order.customer"></div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400" x-text="order.country"></div>
+                              </div>
+                            </div>
+                          </td>
+                          <td class="px-4 py-4 text-sm text-right text-amber-600 dark:text-amber-400" x-text="formatCurrency(order.totalSupplierCost)"></td>
+                          <td class="px-4 py-4 text-sm text-right text-green-600 dark:text-green-400" x-text="formatCurrency(order.totalClientCost)"></td>
+                          <td class="px-4 py-4 text-sm text-right font-semibold text-blue-600 dark:text-blue-400" x-text="formatCurrency(order.totalClientCost - order.totalSupplierCost)"></td>
+                          <td class="px-4 py-4 text-sm text-right text-gray-900 dark:text-white" x-text="formatCurrency(order.totalRevenue)"></td>
+                          <td class="px-4 py-4">
+                            <span
+                              class="px-2 py-1 text-xs font-medium rounded-full"
+                              :class="getStatusClass(order.status)"
+                              x-text="order.status.charAt(0).toUpperCase() + order.status.slice(1)"
+                            ></span>
+                          </td>
+                          <td class="px-4 py-4 text-right">
+                            <button
+                              @click.stop="viewOrderDetails(order)"
+                              class="px-3 py-1 text-sm text-blue-600 hover:bg-blue-50 rounded dark:text-blue-400 dark:hover:bg-blue-900/30"
+                            >
+                              View
+                            </button>
+                          </td>
+                        </tr>
+                      </template>
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- Empty state -->
+                <template x-if="filteredOrders.length === 0">
+                  <div class="px-6 py-12 text-center">
+                    <svg class="mx-auto w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                    </svg>
+                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">No orders found</p>
+                  </div>
+                </template>
+              </div>
+
+              <!-- Order Details Modal -->
+              <template x-if="orderDetailsModal && selectedOrder">
+                <div class="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black bg-opacity-50">
+                  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+                    <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <h3 class="text-xl font-semibold text-gray-900 dark:text-white" x-text="'Order ' + selectedOrder.id"></h3>
+                          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            <span x-text="selectedOrder.client"></span> • Shopify <span x-text="selectedOrder.shopifyId"></span>
+                          </p>
+                        </div>
+                        <button
+                          @click="orderDetailsModal = false"
+                          class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                        >
+                          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="p-6 space-y-6">
+                      <!-- Order Info & Status -->
+                      <div class="flex flex-wrap items-center justify-between gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                        <div class="flex flex-wrap items-center gap-6">
+                          <div>
+                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Customer</label>
+                            <div class="flex items-center gap-2">
+                              <span x-text="getCountryFlag(selectedOrder.country)"></span>
+                              <span class="text-sm font-medium text-gray-900 dark:text-white" x-text="selectedOrder.customer"></span>
+                            </div>
+                          </div>
+                          <div>
+                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Order Date</label>
+                            <div class="text-sm font-medium text-gray-900 dark:text-white" x-text="formatDate(selectedOrder.orderDate)"></div>
+                          </div>
+                          <div>
+                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Status</label>
+                            <span
+                              class="px-3 py-1 text-sm font-medium rounded-full"
+                              :class="getStatusClass(selectedOrder.status)"
+                              x-text="selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)"
+                            ></span>
+                          </div>
+                        </div>
+                        <div class="flex gap-2">
+                          <template x-if="selectedOrder.status === 'pending'">
+                            <button
+                              @click="updateOrderStatus(selectedOrder, 'processing')"
+                              class="px-4 py-2 bg-amber-600 text-white text-sm rounded-lg hover:bg-amber-700"
+                            >
+                              Mark Processing
+                            </button>
+                          </template>
+                          <template x-if="selectedOrder.status === 'processing'">
+                            <button
+                              @click="updateOrderStatus(selectedOrder, 'shipped')"
+                              class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700"
+                            >
+                              Mark Shipped
+                            </button>
+                          </template>
+                          <template x-if="selectedOrder.status === 'shipped'">
+                            <button
+                              @click="updateOrderStatus(selectedOrder, 'delivered')"
+                              class="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700"
+                            >
+                              Mark Delivered
+                            </button>
+                          </template>
+                        </div>
+                      </div>
+
+                      <!-- Tracking Info -->
+                      <template x-if="selectedOrder.trackingNumber">
+                        <div class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                          <div class="flex items-center gap-3">
+                            <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                            </svg>
+                            <div>
+                              <p class="text-sm font-medium text-blue-900 dark:text-blue-100">Tracking Number</p>
+                              <p class="text-sm text-blue-700 dark:text-blue-300 font-mono" x-text="selectedOrder.trackingNumber"></p>
+                            </div>
+                          </div>
+                        </div>
+                      </template>
+
+                      <!-- Order Items with COGS -->
+                      <div>
+                        <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Order Items</h4>
+                        <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                          <table class="w-full text-sm">
+                            <thead class="bg-gray-50 dark:bg-gray-700">
+                              <tr>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300">Product</th>
+                                <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-300">Qty</th>
+                                <th class="px-3 py-2 text-right text-xs font-medium text-amber-600 dark:text-amber-400">Our Cost</th>
+                                <th class="px-3 py-2 text-right text-xs font-medium text-green-600 dark:text-green-400">Client COGS</th>
+                                <th class="px-3 py-2 text-right text-xs font-medium text-blue-600 dark:text-blue-400">Our Profit</th>
+                                <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-300">Sell Price</th>
+                              </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                              <template x-for="item in selectedOrder.items" :key="item.sku">
+                                <tr>
+                                  <td class="px-3 py-3">
+                                    <div class="text-gray-900 dark:text-white" x-text="item.name"></div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400" x-text="item.sku"></div>
+                                  </td>
+                                  <td class="px-3 py-3 text-gray-900 dark:text-white text-center" x-text="item.quantity"></td>
+                                  <td class="px-3 py-3 text-amber-600 dark:text-amber-400 text-right" x-text="formatCurrency(item.supplierCost * item.quantity)"></td>
+                                  <td class="px-3 py-3 text-green-600 dark:text-green-400 text-right" x-text="formatCurrency(item.clientCost * item.quantity)"></td>
+                                  <td class="px-3 py-3 font-medium text-blue-600 dark:text-blue-400 text-right" x-text="formatCurrency((item.clientCost - item.supplierCost) * item.quantity)"></td>
+                                  <td class="px-3 py-3 text-gray-900 dark:text-white text-right" x-text="formatCurrency(item.sellingPrice * item.quantity)"></td>
+                                </tr>
+                              </template>
+                            </tbody>
+                            <tfoot class="bg-gray-50 dark:bg-gray-700">
+                              <tr>
+                                <td colspan="2" class="px-3 py-3 font-medium text-gray-900 dark:text-white">Totals</td>
+                                <td class="px-3 py-3 font-medium text-amber-600 dark:text-amber-400 text-right" x-text="formatCurrency(selectedOrder.totalSupplierCost)"></td>
+                                <td class="px-3 py-3 font-medium text-green-600 dark:text-green-400 text-right" x-text="formatCurrency(selectedOrder.totalClientCost)"></td>
+                                <td class="px-3 py-3 font-bold text-blue-600 dark:text-blue-400 text-right" x-text="formatCurrency(selectedOrder.totalClientCost - selectedOrder.totalSupplierCost)"></td>
+                                <td class="px-3 py-3 font-medium text-gray-900 dark:text-white text-right" x-text="formatCurrency(selectedOrder.totalRevenue)"></td>
+                              </tr>
+                            </tfoot>
+                          </table>
+                        </div>
+                        <!-- Profit Summary -->
+                        <div class="mt-4 grid grid-cols-2 gap-4">
+                          <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                            <p class="text-xs text-blue-600 dark:text-blue-400 font-medium">Innovativa Profit</p>
+                            <p class="text-lg font-bold text-blue-600 dark:text-blue-400" x-text="formatCurrency(selectedOrder.totalClientCost - selectedOrder.totalSupplierCost)"></p>
+                            <p class="text-xs text-blue-600/70 dark:text-blue-400/70">Client COGS - Our Cost</p>
+                          </div>
+                          <div class="p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                            <p class="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Client Profit</p>
+                            <p class="text-lg font-bold text-emerald-600 dark:text-emerald-400" x-text="formatCurrency(selectedOrder.totalRevenue - selectedOrder.totalClientCost)"></p>
+                            <p class="text-xs text-emerald-600/70 dark:text-emerald-400/70">Revenue - Client COGS</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+                      <button
+                        @click="orderDetailsModal = false"
+                        class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600"
+                      >
+                        Close
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </template>
+
+            </div>
+          </div>
+        </main>
+        <!-- ===== Main Content End ===== -->
+      </div>
+      <!-- ===== Content Area End ===== -->
+    </div>
+    <!-- ===== Page Wrapper End ===== -->
+  </body>
+</html>

@@ -1,0 +1,799 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Quote Requests | Innovativa</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📦%3C/text%3E%3C/svg%3E">
+  </head>
+  <body
+    x-data="{ page: 'quotes', 'loaded': true, 'darkMode': false, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
+    x-init="
+         darkMode = JSON.parse(localStorage.getItem('darkMode'));
+         $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+    :class="{'dark bg-gray-900': darkMode === true}"
+  >
+    <!-- ===== Preloader Start ===== -->
+    <include src="./partials/preloader.html"></include>
+    <!-- ===== Preloader End ===== -->
+
+    <!-- ===== Page Wrapper Start ===== -->
+    <div class="flex h-screen overflow-hidden">
+      <!-- ===== Sidebar Start ===== -->
+      <include src="./partials/sidebar.html"></include>
+      <!-- ===== Sidebar End ===== -->
+
+      <!-- ===== Content Area Start ===== -->
+      <div
+        class="relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto"
+      >
+        <!-- Small Device Overlay Start -->
+        <include src="./partials/overlay.html" />
+        <!-- Small Device Overlay End -->
+
+        <!-- ===== Header Start ===== -->
+        <include src="./partials/header.html" />
+        <!-- ===== Header End ===== -->
+
+        <!-- ===== Main Content Start ===== -->
+        <main>
+          <div
+            class="mx-auto max-w-(--breakpoint-2xl) p-4 md:p-6"
+            x-data="{
+              activeTab: 'pending',
+              selectedQuote: null,
+              responseModal: false,
+              successModal: false,
+              responding: false,
+              actionType: '',
+
+              // Filters
+              filterClient: 'all',
+              filterType: 'all',
+              searchQuery: '',
+
+              // Quote requests data
+              quoteRequests: [
+                {
+                  id: 'QR-001',
+                  client: 'GloveWorld Store',
+                  contact: 'Sarah Chen',
+                  email: 'sarah@gloveworld.com',
+                  product: 'Winter Gloves Pro',
+                  sku: 'WG-PRO-001',
+                  description: 'Waterproof winter gloves with touchscreen capability',
+                  submitted: '2025-01-15 14:32',
+                  countries: ['US', 'UK', 'DE'],
+                  quantities: [1, 3, 5],
+                  shippingType: 'single',
+                  status: 'pending',
+                  notes: 'Need bulk pricing for Q1 campaign',
+                  pricing: {}
+                },
+                {
+                  id: 'QR-002',
+                  client: 'TechGadgets Pro',
+                  contact: 'Mike Johnson',
+                  email: 'mike@techgadgetspro.com',
+                  product: 'USB-C Hub 7-in-1',
+                  sku: 'USB-HUB-7',
+                  description: '7-port USB-C hub with HDMI and SD card reader',
+                  submitted: '2025-01-15 11:20',
+                  countries: ['US', 'UK'],
+                  quantities: [1, 3, 5],
+                  shippingType: 'both',
+                  status: 'pending',
+                  notes: 'Also need upsell pricing for bundle deals',
+                  pricing: {}
+                },
+                {
+                  id: 'QR-003',
+                  client: 'PetSupplies Direct',
+                  contact: 'Emily Watson',
+                  email: 'emily@petsuppliesdirect.com',
+                  product: 'Premium Dog Bed - Large',
+                  sku: 'PDB-L-001',
+                  description: 'Orthopedic memory foam dog bed, large size',
+                  submitted: '2025-01-14 16:45',
+                  countries: ['UK', 'DE', 'FR'],
+                  quantities: [1, 3, 5],
+                  shippingType: 'single',
+                  status: 'pending',
+                  notes: 'Expanding to EU markets, need competitive pricing',
+                  pricing: {}
+                },
+                {
+                  id: 'QR-004',
+                  client: 'BeautyBliss Store',
+                  contact: 'Sophie Martin',
+                  email: 'sophie@beautybliss.fr',
+                  product: 'Makeup Brush Set - 12pc',
+                  sku: 'MBS-12-PRO',
+                  description: 'Professional makeup brush set with carrying case',
+                  submitted: '2025-01-14 09:15',
+                  countries: ['FR', 'DE', 'IT', 'ES'],
+                  quantities: [1, 3, 5, 10],
+                  shippingType: 'both',
+                  status: 'pending',
+                  notes: 'High volume expected, need best price for 10+ qty',
+                  pricing: {}
+                },
+                {
+                  id: 'QR-005',
+                  client: 'FitLife Gear',
+                  contact: 'James Rodriguez',
+                  email: 'james@fitlifegear.com',
+                  product: 'Resistance Band Set',
+                  sku: 'RB-SET-5',
+                  description: '5-piece resistance band set with door anchor',
+                  submitted: '2025-01-13 15:30',
+                  countries: ['US'],
+                  quantities: [1, 3, 5],
+                  shippingType: 'single',
+                  status: 'responded',
+                  notes: '',
+                  pricing: {
+                    'US': { '1': { single: { supplier: 9.50, client: 12.50 } }, '3': { single: { supplier: 8.20, client: 11.00 } }, '5': { single: { supplier: 7.00, client: 9.50 } } }
+                  }
+                },
+                {
+                  id: 'QR-006',
+                  client: 'HomeDecor Haven',
+                  contact: 'Lisa Thompson',
+                  email: 'lisa@homedecorhaven.co.uk',
+                  product: 'LED String Lights - 100ft',
+                  sku: 'LSL-100',
+                  description: 'Waterproof LED string lights with remote control',
+                  submitted: '2025-01-12 10:22',
+                  countries: ['UK', 'DE'],
+                  quantities: [1, 3, 5],
+                  shippingType: 'both',
+                  status: 'approved',
+                  notes: '',
+                  pricing: {
+                    'UK': { '1': { single: { supplier: 14.50, client: 18.99 }, upsell: { supplier: 12.00, client: 15.99 } }, '3': { single: { supplier: 12.50, client: 16.50 }, upsell: { supplier: 10.00, client: 13.50 } }, '5': { single: { supplier: 10.50, client: 14.00 }, upsell: { supplier: 8.50, client: 11.50 } } },
+                    'DE': { '1': { single: { supplier: 15.50, client: 19.99 }, upsell: { supplier: 13.00, client: 16.99 } }, '3': { single: { supplier: 13.50, client: 17.50 }, upsell: { supplier: 11.00, client: 14.50 } }, '5': { single: { supplier: 11.50, client: 15.00 }, upsell: { supplier: 9.50, client: 12.50 } } }
+                  }
+                }
+              ],
+
+              // Temp pricing for response form
+              tempPricing: {},
+
+              get pendingQuotes() {
+                return this.filteredQuotes.filter(q => q.status === 'pending');
+              },
+
+              get respondedQuotes() {
+                return this.filteredQuotes.filter(q => q.status === 'responded' || q.status === 'approved');
+              },
+
+              get filteredQuotes() {
+                return this.quoteRequests.filter(quote => {
+                  if (this.filterClient !== 'all' && quote.client !== this.filterClient) return false;
+                  if (this.filterType !== 'all' && quote.shippingType !== this.filterType) return false;
+                  if (this.searchQuery) {
+                    const query = this.searchQuery.toLowerCase();
+                    return quote.id.toLowerCase().includes(query) ||
+                           quote.product.toLowerCase().includes(query) ||
+                           quote.client.toLowerCase().includes(query) ||
+                           quote.sku.toLowerCase().includes(query);
+                  }
+                  return true;
+                });
+              },
+
+              get uniqueClients() {
+                return [...new Set(this.quoteRequests.map(q => q.client))];
+              },
+
+              openResponse(quote) {
+                this.selectedQuote = JSON.parse(JSON.stringify(quote));
+                this.tempPricing = {};
+
+                // Initialize temp pricing structure with supplier and client prices
+                this.selectedQuote.countries.forEach(country => {
+                  this.tempPricing[country] = {
+                    shipping: {
+                      supplier: quote.pricing[country]?.shipping?.supplier || '',
+                      client: quote.pricing[country]?.shipping?.client || ''
+                    }
+                  };
+                  this.selectedQuote.quantities.forEach(qty => {
+                    this.tempPricing[country][qty] = {
+                      single: {
+                        supplier: quote.pricing[country]?.[qty]?.single?.supplier || '',
+                        client: quote.pricing[country]?.[qty]?.single?.client || ''
+                      },
+                      upsell: {
+                        supplier: quote.pricing[country]?.[qty]?.upsell?.supplier || '',
+                        client: quote.pricing[country]?.[qty]?.upsell?.client || ''
+                      }
+                    };
+                  });
+                });
+
+                this.responseModal = true;
+              },
+
+              closeResponse() {
+                this.responseModal = false;
+                setTimeout(() => {
+                  this.selectedQuote = null;
+                  this.tempPricing = {};
+                }, 300);
+              },
+
+              submitResponse() {
+                this.responding = true;
+
+                setTimeout(() => {
+                  // Update the quote with pricing
+                  const index = this.quoteRequests.findIndex(q => q.id === this.selectedQuote.id);
+                  if (index > -1) {
+                    this.quoteRequests[index].pricing = JSON.parse(JSON.stringify(this.tempPricing));
+                    this.quoteRequests[index].status = 'responded';
+                  }
+
+                  this.responding = false;
+                  this.responseModal = false;
+                  this.actionType = 'responded';
+                  this.successModal = true;
+
+                  setTimeout(() => {
+                    this.successModal = false;
+                    this.selectedQuote = null;
+                    this.tempPricing = {};
+                  }, 3000);
+                }, 1500);
+              },
+
+              formatCurrency(amount) {
+                if (!amount || amount === '') return '-';
+                return '$' + parseFloat(amount).toFixed(2);
+              },
+
+              formatDate(dateStr) {
+                const date = new Date(dateStr);
+                const now = new Date();
+                const diffMs = now - date;
+                const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+                const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+                if (diffHours < 1) return 'Just now';
+                if (diffHours < 24) return diffHours + 'h ago';
+                if (diffDays < 7) return diffDays + 'd ago';
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+              },
+
+              getStatusClass(status) {
+                if (status === 'pending') return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400';
+                if (status === 'responded') return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
+                if (status === 'approved') return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
+                return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-400';
+              },
+
+              getCountryFlag(code) {
+                const flags = { 'US': '🇺🇸', 'UK': '🇬🇧', 'DE': '🇩🇪', 'FR': '🇫🇷', 'IT': '🇮🇹', 'ES': '🇪🇸', 'CA': '🇨🇦', 'AU': '🇦🇺' };
+                return flags[code] || code;
+              },
+
+              clearFilters() {
+                this.filterClient = 'all';
+                this.filterType = 'all';
+                this.searchQuery = '';
+              }
+            }"
+          >
+            <!-- Page Header -->
+            <div class="mb-6">
+              <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+                Quote Requests
+              </h1>
+              <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                Review and respond to client pricing requests
+              </p>
+            </div>
+
+            <!-- Tabs -->
+            <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
+              <nav class="flex gap-4">
+                <button
+                  @click="activeTab = 'pending'"
+                  :class="activeTab === 'pending' ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400' : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
+                  class="border-b-2 px-4 py-2 text-sm font-medium transition-colors flex items-center gap-2"
+                >
+                  Pending
+                  <span class="inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full bg-amber-500 text-xs font-bold text-white" x-text="pendingQuotes.length"></span>
+                </button>
+                <button
+                  @click="activeTab = 'responded'"
+                  :class="activeTab === 'responded' ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400' : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
+                  class="border-b-2 px-4 py-2 text-sm font-medium transition-colors"
+                >
+                  Responded (<span x-text="respondedQuotes.length"></span>)
+                </button>
+              </nav>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4">
+              <div class="rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-800">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Pending Quotes</p>
+                    <p class="mt-1 text-2xl font-bold text-gray-900 dark:text-white" x-text="pendingQuotes.length"></p>
+                  </div>
+                  <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <div class="rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-800">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Awaiting Approval</p>
+                    <p class="mt-1 text-2xl font-bold text-gray-900 dark:text-white" x-text="quoteRequests.filter(q => q.status === 'responded').length"></p>
+                  </div>
+                  <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <div class="rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-800">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Approved This Week</p>
+                    <p class="mt-1 text-2xl font-bold text-gray-900 dark:text-white" x-text="quoteRequests.filter(q => q.status === 'approved').length"></p>
+                  </div>
+                  <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <div class="rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-800">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Active Clients</p>
+                    <p class="mt-1 text-2xl font-bold text-gray-900 dark:text-white" x-text="uniqueClients.length"></p>
+                  </div>
+                  <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="mb-6 rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+              <div class="flex flex-wrap items-center gap-4">
+                <!-- Search -->
+                <div class="relative flex-1 min-w-[200px]">
+                  <input
+                    type="text"
+                    x-model="searchQuery"
+                    placeholder="Search by ID, product, client..."
+                    class="w-full rounded-lg border border-gray-300 px-4 py-2 pl-10 text-sm focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  />
+                  <svg class="absolute top-2.5 left-3 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                  </svg>
+                </div>
+
+                <!-- Client Filter -->
+                <select
+                  x-model="filterClient"
+                  class="rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                >
+                  <option value="all">All Clients</option>
+                  <template x-for="client in uniqueClients" :key="client">
+                    <option :value="client" x-text="client"></option>
+                  </template>
+                </select>
+
+                <!-- Type Filter -->
+                <select
+                  x-model="filterType"
+                  class="rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                >
+                  <option value="all">All Types</option>
+                  <option value="single">Single Orders Only</option>
+                  <option value="both">Single + Upsell</option>
+                </select>
+
+                <button
+                  @click="clearFilters()"
+                  class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+
+            <!-- Pending Tab -->
+            <div x-show="activeTab === 'pending'">
+              <div class="rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+                <div class="border-b border-gray-200 p-4 dark:border-gray-700">
+                  <h2 class="text-lg font-bold text-gray-900 dark:text-white">Pending Quote Requests</h2>
+                </div>
+
+                <template x-if="pendingQuotes.length === 0">
+                  <div class="p-12 text-center">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <p class="mt-4 text-gray-600 dark:text-gray-400">No pending quote requests</p>
+                  </div>
+                </template>
+
+                <div class="divide-y divide-gray-200 dark:divide-gray-700">
+                  <template x-for="quote in pendingQuotes" :key="quote.id">
+                    <div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer" @click="openResponse(quote)">
+                      <div class="flex items-start justify-between gap-4">
+                        <div class="flex-1">
+                          <div class="flex items-center gap-3 mb-2">
+                            <span class="text-sm font-bold text-blue-600 dark:text-blue-400" x-text="quote.id"></span>
+                            <span class="px-2 py-0.5 text-xs font-medium rounded-full" :class="getStatusClass(quote.status)" x-text="quote.status.toUpperCase()"></span>
+                            <span class="text-xs text-gray-500 dark:text-gray-400" x-text="formatDate(quote.submitted)"></span>
+                          </div>
+
+                          <h3 class="text-base font-semibold text-gray-900 dark:text-white" x-text="quote.product"></h3>
+                          <p class="text-sm text-gray-500 dark:text-gray-400" x-text="'SKU: ' + quote.sku"></p>
+
+                          <div class="mt-3 flex flex-wrap items-center gap-4 text-sm">
+                            <div>
+                              <span class="text-gray-500 dark:text-gray-400">Client:</span>
+                              <span class="ml-1 font-medium text-gray-900 dark:text-white" x-text="quote.client"></span>
+                            </div>
+                            <div>
+                              <span class="text-gray-500 dark:text-gray-400">Countries:</span>
+                              <span class="ml-1">
+                                <template x-for="country in quote.countries" :key="country">
+                                  <span class="mr-1" x-text="getCountryFlag(country)"></span>
+                                </template>
+                              </span>
+                            </div>
+                            <div>
+                              <span class="text-gray-500 dark:text-gray-400">Quantities:</span>
+                              <span class="ml-1 font-medium text-gray-900 dark:text-white" x-text="quote.quantities.join(', ')"></span>
+                            </div>
+                            <div>
+                              <span class="text-gray-500 dark:text-gray-400">Type:</span>
+                              <span class="ml-1 font-medium text-gray-900 dark:text-white" x-text="quote.shippingType === 'both' ? 'Single + Upsell' : 'Single Only'"></span>
+                            </div>
+                          </div>
+
+                          <template x-if="quote.notes">
+                            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400 italic" x-text="'Note: ' + quote.notes"></p>
+                          </template>
+                        </div>
+
+                        <button
+                          @click.stop="openResponse(quote)"
+                          class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 flex items-center gap-2"
+                        >
+                          Respond
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </div>
+
+            <!-- Responded Tab -->
+            <div x-show="activeTab === 'responded'">
+              <div class="rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+                <div class="border-b border-gray-200 p-4 dark:border-gray-700">
+                  <h2 class="text-lg font-bold text-gray-900 dark:text-white">Responded Quotes</h2>
+                </div>
+
+                <template x-if="respondedQuotes.length === 0">
+                  <div class="p-12 text-center">
+                    <p class="text-gray-600 dark:text-gray-400">No responded quotes yet</p>
+                  </div>
+                </template>
+
+                <div class="divide-y divide-gray-200 dark:divide-gray-700">
+                  <template x-for="quote in respondedQuotes" :key="quote.id">
+                    <div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer" @click="openResponse(quote)">
+                      <div class="flex items-start justify-between gap-4">
+                        <div class="flex-1">
+                          <div class="flex items-center gap-3 mb-2">
+                            <span class="text-sm font-bold text-blue-600 dark:text-blue-400" x-text="quote.id"></span>
+                            <span class="px-2 py-0.5 text-xs font-medium rounded-full" :class="getStatusClass(quote.status)" x-text="quote.status.toUpperCase()"></span>
+                          </div>
+
+                          <h3 class="text-base font-semibold text-gray-900 dark:text-white" x-text="quote.product"></h3>
+                          <p class="text-sm text-gray-500 dark:text-gray-400" x-text="quote.client + ' • ' + quote.sku"></p>
+
+                          <div class="mt-2 flex items-center gap-2">
+                            <template x-for="country in quote.countries" :key="country">
+                              <span class="text-sm" x-text="getCountryFlag(country)"></span>
+                            </template>
+                          </div>
+                        </div>
+
+                        <button
+                          @click.stop="openResponse(quote)"
+                          class="px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                        >
+                          View Pricing
+                        </button>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </div>
+
+            <!-- Response Modal -->
+            <template x-if="responseModal && selectedQuote">
+              <div
+                class="fixed inset-0 z-[99999] flex items-center justify-center bg-black bg-opacity-50 p-4"
+                @click.self="closeResponse()"
+              >
+                <div
+                  class="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-lg bg-white shadow-xl dark:bg-gray-800"
+                  @click.stop
+                >
+                  <!-- Modal Header -->
+                  <div class="sticky top-0 z-10 flex items-center justify-between border-b border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+                    <div>
+                      <h3 class="text-xl font-bold text-gray-900 dark:text-white" x-text="selectedQuote.product"></h3>
+                      <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                        <span x-text="selectedQuote.id"></span> • <span x-text="selectedQuote.client"></span> • <span x-text="selectedQuote.sku"></span>
+                      </p>
+                    </div>
+                    <button @click="closeResponse()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                      <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                      </svg>
+                    </button>
+                  </div>
+
+                  <!-- Modal Body -->
+                  <div class="p-6 space-y-6">
+                    <!-- Product Info -->
+                    <div class="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+                      <p class="text-sm text-gray-600 dark:text-gray-400" x-text="selectedQuote.description"></p>
+                      <template x-if="selectedQuote.notes">
+                        <p class="mt-2 text-sm text-amber-600 dark:text-amber-400">
+                          <span class="font-medium">Client Note:</span> <span x-text="selectedQuote.notes"></span>
+                        </p>
+                      </template>
+                    </div>
+
+                    <!-- Request Details -->
+                    <div class="grid grid-cols-3 gap-4 text-sm">
+                      <div class="rounded-lg bg-gray-50 p-3 dark:bg-gray-900">
+                        <p class="text-gray-500 dark:text-gray-400">Target Countries</p>
+                        <p class="mt-1 font-medium text-gray-900 dark:text-white">
+                          <template x-for="country in selectedQuote.countries" :key="country">
+                            <span class="mr-2" x-text="getCountryFlag(country) + ' ' + country"></span>
+                          </template>
+                        </p>
+                      </div>
+                      <div class="rounded-lg bg-gray-50 p-3 dark:bg-gray-900">
+                        <p class="text-gray-500 dark:text-gray-400">Quantity Breaks</p>
+                        <p class="mt-1 font-medium text-gray-900 dark:text-white" x-text="selectedQuote.quantities.join(', ') + ' units'"></p>
+                      </div>
+                      <div class="rounded-lg bg-gray-50 p-3 dark:bg-gray-900">
+                        <p class="text-gray-500 dark:text-gray-400">Pricing Type</p>
+                        <p class="mt-1 font-medium text-gray-900 dark:text-white" x-text="selectedQuote.shippingType === 'both' ? 'Single + Upsell' : 'Single Only'"></p>
+                      </div>
+                    </div>
+
+                    <!-- Pricing Matrix -->
+                    <div>
+                      <h4 class="mb-4 text-lg font-bold text-gray-900 dark:text-white">Pricing Matrix</h4>
+                      <p class="mb-4 text-sm text-gray-600 dark:text-gray-400">Enter per-unit prices in USD. <span class="text-amber-600 dark:text-amber-400 font-medium">Supplier Cost</span> = what we pay China. <span class="text-green-600 dark:text-green-400 font-medium">Client Price</span> = what client pays us.</p>
+
+                      <template x-for="country in selectedQuote.countries" :key="country">
+                        <div class="mb-6">
+                          <h5 class="mb-3 flex items-center gap-2 font-semibold text-gray-900 dark:text-white">
+                            <span x-text="getCountryFlag(country)"></span>
+                            <span x-text="country"></span>
+                          </h5>
+
+                          <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                              <thead>
+                                <tr class="border-b border-gray-200 dark:border-gray-700">
+                                  <th class="pb-2 text-left font-medium text-gray-600 dark:text-gray-400">Qty</th>
+                                  <th class="pb-2 text-center font-medium text-gray-600 dark:text-gray-400" colspan="2">Single Order</th>
+                                  <template x-if="selectedQuote.shippingType === 'both'">
+                                    <th class="pb-2 text-center font-medium text-gray-600 dark:text-gray-400" colspan="2">Upsell</th>
+                                  </template>
+                                </tr>
+                                <tr class="border-b border-gray-100 dark:border-gray-700/50">
+                                  <th class="pb-2"></th>
+                                  <th class="pb-2 text-center text-xs font-medium text-amber-600 dark:text-amber-400">Supplier</th>
+                                  <th class="pb-2 text-center text-xs font-medium text-green-600 dark:text-green-400">Client</th>
+                                  <template x-if="selectedQuote.shippingType === 'both'">
+                                    <th class="pb-2 text-center text-xs font-medium text-amber-600 dark:text-amber-400">Supplier</th>
+                                  </template>
+                                  <template x-if="selectedQuote.shippingType === 'both'">
+                                    <th class="pb-2 text-center text-xs font-medium text-green-600 dark:text-green-400">Client</th>
+                                  </template>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <template x-for="qty in selectedQuote.quantities" :key="qty">
+                                  <tr class="border-b border-gray-100 dark:border-gray-700/50">
+                                    <td class="py-3 font-medium text-gray-900 dark:text-white" x-text="qty + 'x'"></td>
+                                    <!-- Single - Supplier -->
+                                    <td class="py-3 px-1">
+                                      <div class="relative w-24">
+                                        <span class="absolute left-2 top-2 text-xs text-gray-400">$</span>
+                                        <input
+                                          type="number"
+                                          step="0.01"
+                                          x-model="tempPricing[country][qty].single.supplier"
+                                          class="w-full rounded border border-amber-300 px-2 py-1.5 pl-5 text-sm focus:border-transparent focus:ring-2 focus:ring-amber-500 dark:border-amber-600 dark:bg-gray-700 dark:text-white"
+                                          placeholder="0.00"
+                                        />
+                                      </div>
+                                    </td>
+                                    <!-- Single - Client -->
+                                    <td class="py-3 px-1">
+                                      <div class="relative w-24">
+                                        <span class="absolute left-2 top-2 text-xs text-gray-400">$</span>
+                                        <input
+                                          type="number"
+                                          step="0.01"
+                                          x-model="tempPricing[country][qty].single.client"
+                                          class="w-full rounded border border-green-300 px-2 py-1.5 pl-5 text-sm focus:border-transparent focus:ring-2 focus:ring-green-500 dark:border-green-600 dark:bg-gray-700 dark:text-white"
+                                          placeholder="0.00"
+                                        />
+                                      </div>
+                                    </td>
+                                    <!-- Upsell - Supplier -->
+                                    <template x-if="selectedQuote.shippingType === 'both'">
+                                      <td class="py-3 px-1">
+                                        <div class="relative w-24">
+                                          <span class="absolute left-2 top-2 text-xs text-gray-400">$</span>
+                                          <input
+                                            type="number"
+                                            step="0.01"
+                                            x-model="tempPricing[country][qty].upsell.supplier"
+                                            class="w-full rounded border border-amber-300 px-2 py-1.5 pl-5 text-sm focus:border-transparent focus:ring-2 focus:ring-amber-500 dark:border-amber-600 dark:bg-gray-700 dark:text-white"
+                                            placeholder="0.00"
+                                          />
+                                        </div>
+                                      </td>
+                                    </template>
+                                    <!-- Upsell - Client -->
+                                    <template x-if="selectedQuote.shippingType === 'both'">
+                                      <td class="py-3 px-1">
+                                        <div class="relative w-24">
+                                          <span class="absolute left-2 top-2 text-xs text-gray-400">$</span>
+                                          <input
+                                            type="number"
+                                            step="0.01"
+                                            x-model="tempPricing[country][qty].upsell.client"
+                                            class="w-full rounded border border-green-300 px-2 py-1.5 pl-5 text-sm focus:border-transparent focus:ring-2 focus:ring-green-500 dark:border-green-600 dark:bg-gray-700 dark:text-white"
+                                            placeholder="0.00"
+                                          />
+                                        </div>
+                                      </td>
+                                    </template>
+                                  </tr>
+                                </template>
+                              </tbody>
+                            </table>
+                          </div>
+                          <!-- Shipping Cost for this country -->
+                          <div class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                            <p class="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">Shipping to <span x-text="country"></span></p>
+                            <div class="flex items-center gap-4">
+                              <div>
+                                <label class="text-xs text-amber-600 dark:text-amber-400">Shipping Cost</label>
+                                <div class="relative w-24 mt-1">
+                                  <span class="absolute left-2 top-2 text-xs text-gray-400">$</span>
+                                  <input
+                                    type="number"
+                                    step="0.01"
+                                    x-model="tempPricing[country].shipping.supplier"
+                                    class="w-full rounded border border-amber-300 px-2 py-1.5 pl-5 text-sm focus:border-transparent focus:ring-2 focus:ring-amber-500 dark:border-amber-600 dark:bg-gray-700 dark:text-white"
+                                    placeholder="0.00"
+                                  />
+                                </div>
+                              </div>
+                              <div>
+                                <label class="text-xs text-green-600 dark:text-green-400">Client Shipping</label>
+                                <div class="relative w-24 mt-1">
+                                  <span class="absolute left-2 top-2 text-xs text-gray-400">$</span>
+                                  <input
+                                    type="number"
+                                    step="0.01"
+                                    x-model="tempPricing[country].shipping.client"
+                                    class="w-full rounded border border-green-300 px-2 py-1.5 pl-5 text-sm focus:border-transparent focus:ring-2 focus:ring-green-500 dark:border-green-600 dark:bg-gray-700 dark:text-white"
+                                    placeholder="0.00"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+
+                  <!-- Modal Footer -->
+                  <div class="sticky bottom-0 z-10 flex items-center justify-end gap-3 border-t border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+                    <button
+                      @click="closeResponse()"
+                      class="rounded-lg border border-gray-300 bg-white px-6 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      @click="submitResponse()"
+                      :disabled="responding"
+                      class="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <template x-if="!responding">
+                        <span>Send Quote Response</span>
+                      </template>
+                      <template x-if="responding">
+                        <span class="flex items-center gap-2">
+                          <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Sending...
+                        </span>
+                      </template>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <!-- Success Modal -->
+            <template x-if="successModal">
+              <div class="fixed inset-0 z-[99999] flex items-center justify-center bg-black bg-opacity-50 p-4">
+                <div class="w-full max-w-md rounded-lg bg-white shadow-xl dark:bg-gray-800">
+                  <div class="p-6 text-center">
+                    <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
+                      <svg class="h-10 w-10 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                      </svg>
+                    </div>
+                    <h3 class="mt-4 text-xl font-bold text-gray-900 dark:text-white">Quote Response Sent!</h3>
+                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                      The client will be notified and can review the pricing.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </template>
+
+          </div>
+        </main>
+        <!-- ===== Main Content End ===== -->
+      </div>
+      <!-- ===== Content Area End ===== -->
+    </div>
+    <!-- ===== Page Wrapper End ===== -->
+  </body>
+</html>
