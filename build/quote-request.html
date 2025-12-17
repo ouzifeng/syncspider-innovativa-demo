@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Request Quote | Innovativa Client Portal</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📦</text></svg>">
+  <link rel="icon" href="favicon-purbeck.png"><link href="style.css" rel="stylesheet"></head>
+  <body
+    x-data="{
+      page: 'quoteRequest',
+      loaded: true,
+      darkMode: false,
+      pendingQuotes: 2,
+      user: { name: 'Emma Thompson', email: 'emma@luxebeauty.co.uk', company: 'Luxe Beauty Co', role: 'Owner' },
+
+      products: [
+        { id: 1, image: null, imagePreview: null, productName: '', productUrl: '', countries: ['US', 'UK'], quantities: [1, 3], includeSingle: true, includeUpsell: true }
+      ],
+
+      activeDropdown: null,
+      countryOptions: [
+        { code: 'US', flag: '🇺🇸' },
+        { code: 'UK', flag: '🇬🇧' },
+        { code: 'EU', flag: '🇪🇺' },
+        { code: 'AU', flag: '🇦🇺' },
+        { code: 'CA', flag: '🇨🇦' },
+        { code: 'AE', flag: '🇦🇪' }
+      ],
+      quantityOptions: [1, 2, 3, 5, 10],
+      submitting: false,
+      submitted: false,
+
+      addRow() {
+        this.products.push({ id: Date.now(), image: null, imagePreview: null, productName: '', productUrl: '', countries: ['US', 'UK'], quantities: [1, 3], includeSingle: true, includeUpsell: true });
+      },
+      removeRow(i) { if (this.products.length > 1) this.products.splice(i, 1); },
+      handleImageUpload(e, i) {
+        const f = e.target.files[0];
+        if (f) { this.products[i].image = f; this.products[i].imagePreview = URL.createObjectURL(f); }
+      },
+      removeImage(i) { this.products[i].image = null; this.products[i].imagePreview = null; },
+      toggleCountry(i, code) {
+        const c = this.products[i].countries, idx = c.indexOf(code);
+        idx > -1 ? c.splice(idx, 1) : c.push(code);
+      },
+      toggleQty(i, q) {
+        const arr = this.products[i].quantities, idx = arr.indexOf(q);
+        idx > -1 ? arr.splice(idx, 1) : (arr.push(q), arr.sort((a,b) => a-b));
+      },
+      getFlags(c) { return c.map(x => this.countryOptions.find(o => o.code === x)?.flag || x).join(''); },
+      isValid(p) { return (p.image || p.productUrl) && p.productName && p.countries.length && p.quantities.length; },
+      get validCount() { return this.products.filter(p => this.isValid(p)).length; },
+      get totalPricePoints() {
+        return this.products.reduce((t, p) => {
+          if (!this.isValid(p)) return t;
+          return t + (p.countries.length * p.quantities.length * ((p.includeSingle?1:0) + (p.includeUpsell?1:0)));
+        }, 0);
+      },
+      submit() {
+        if (!this.validCount) return;
+        this.submitting = true;
+        setTimeout(() => { this.submitting = false; this.submitted = true; }, 1500);
+      },
+      reset() {
+        this.submitted = false;
+        this.products = [{ id: Date.now(), image: null, imagePreview: null, productName: '', productUrl: '', countries: ['US', 'UK'], quantities: [1, 3], includeSingle: true, includeUpsell: true }];
+      }
+    }"
+    x-init="darkMode = JSON.parse(localStorage.getItem('darkMode')); $watch('darkMode', v => localStorage.setItem('darkMode', JSON.stringify(v)))"
+    :class="{'dark bg-gray-900': darkMode}"
+    @click="activeDropdown = null"
+  >
+    <div
+  x-show="loaded"
+  x-init="window.addEventListener('DOMContentLoaded', () => {setTimeout(() => loaded = false, 500)})"
+  class="fixed left-0 top-0 z-999999 flex h-screen w-screen items-center justify-center bg-white dark:bg-black"
+>
+  <div
+    class="h-16 w-16 animate-spin rounded-full border-4 border-solid border-brand-500 border-t-transparent"
+  ></div>
+</div>
+
+
+    <div class="flex min-h-screen flex-col bg-gray-50 dark:bg-gray-900">
+      <!-- ===== Client Portal Top Navigation Bar ===== -->
+<header
+  class="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800"
+>
+  <div class="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
+    <div class="flex h-16 items-center justify-between">
+      <!-- Left: Logo & Nav -->
+      <div class="flex items-center gap-8">
+        <!-- Logo -->
+        <a href="buyer-dashboard.html" class="flex items-center gap-3">
+          <span class="text-xl font-bold text-gray-900 dark:text-white">Innovativa</span>
+          <span class="hidden sm:inline text-xs text-gray-500 dark:text-gray-400">Client Portal</span>
+        </a>
+
+        <!-- Main Navigation -->
+        <nav class="hidden items-center gap-6 md:flex">
+          <a
+            href="buyer-dashboard.html"
+            :class="page === 'buyerDashboard' ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-700 hover:text-emerald-600 dark:text-gray-300 dark:hover:text-emerald-400'"
+            class="text-sm font-medium transition-colors"
+          >
+            Dashboard
+          </a>
+          <a
+            href="quote-request.html"
+            :class="page === 'quoteRequest' ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-700 hover:text-emerald-600 dark:text-gray-300 dark:hover:text-emerald-400'"
+            class="text-sm font-medium transition-colors"
+          >
+            Request Quote
+          </a>
+          <a
+            href="buyer-products.html"
+            :class="page === 'buyerProducts' ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-700 hover:text-emerald-600 dark:text-gray-300 dark:hover:text-emerald-400'"
+            class="text-sm font-medium transition-colors"
+          >
+            My Pricing
+          </a>
+          <a
+            href="buyer-orders.html"
+            :class="page === 'buyerOrders' ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-700 hover:text-emerald-600 dark:text-gray-300 dark:hover:text-emerald-400'"
+            class="text-sm font-medium transition-colors"
+          >
+            My Orders
+          </a>
+        </nav>
+      </div>
+
+      <!-- Right: Notifications, User -->
+      <div class="flex items-center gap-4">
+        <!-- Pending Quotes Notification -->
+        <a
+          href="buyer-products.html?filter=pending"
+          class="relative p-2 text-gray-700 transition-colors hover:text-emerald-600 dark:text-gray-300 dark:hover:text-emerald-400"
+          title="Pending Quotes"
+        >
+          <svg
+            class="h-6 w-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+            />
+          </svg>
+          <span
+            x-show="pendingQuotes > 0"
+            class="absolute top-0 right-0 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-600 text-xs font-bold text-white"
+            x-text="pendingQuotes"
+          ></span>
+        </a>
+
+        <!-- User Profile Dropdown -->
+        <div
+          x-data="{ open: false }"
+          @click.away="open = false"
+          class="relative"
+        >
+          <button
+            @click="open = !open"
+            class="flex items-center gap-2 p-2 text-gray-700 transition-colors hover:text-emerald-600 dark:text-gray-300 dark:hover:text-emerald-400"
+          >
+            <div
+              class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-sm font-semibold text-white"
+            >
+              <span
+                x-text="user.name.split(' ').map(n => n[0]).join('')"
+              ></span>
+            </div>
+            <svg
+              class="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
+
+          <!-- Dropdown Menu -->
+          <div
+            x-show="open"
+            x-transition
+            class="absolute right-0 mt-2 w-64 rounded-lg border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800"
+          >
+            <div class="border-b border-gray-200 p-4 dark:border-gray-700">
+              <p
+                class="text-sm font-semibold text-gray-900 dark:text-white"
+                x-text="user.name"
+              ></p>
+              <p
+                class="text-xs text-gray-500 dark:text-gray-400"
+                x-text="user.email"
+              ></p>
+              <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">
+                <span x-text="user.company"></span> •
+                <span x-text="user.role"></span>
+              </p>
+            </div>
+            <div class="p-2">
+              <a
+                href="#"
+                class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+              >
+                <svg
+                  class="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  />
+                </svg>
+                My Account
+              </a>
+              <a
+                href="#"
+                class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+              >
+                <svg
+                  class="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+                Settings
+              </a>
+            </div>
+            <div class="border-t border-gray-200 p-2 dark:border-gray-700">
+              <a
+                href="b2b-login.html"
+                class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+              >
+                <svg
+                  class="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                  />
+                </svg>
+                Sign Out
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+
+      <main class="flex-1 py-8">
+        <div class="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
+          <div class="mb-6">
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Request Quote</h1>
+            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Submit products you want us to source and price</p>
+          </div>
+
+          <!-- Success -->
+          <div x-show="submitted" x-transition class="rounded-lg border border-emerald-200 bg-emerald-50 p-6 dark:border-emerald-800 dark:bg-emerald-900/20">
+            <div class="flex items-center gap-4">
+              <div class="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-800">
+                <svg class="h-6 w-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              </div>
+              <div class="flex-1">
+                <h3 class="text-lg font-semibold text-emerald-800 dark:text-emerald-200">Quote Request Submitted!</h3>
+                <p class="text-sm text-emerald-700 dark:text-emerald-300">We've received <span x-text="validCount" class="font-semibold"></span> product(s). Expect pricing within 24-48 hours.</p>
+              </div>
+              <div class="flex gap-2">
+                <a href="buyer-products.html" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">View My Pricing</a>
+                <button @click="reset()" class="rounded-lg border border-emerald-600 px-4 py-2 text-sm font-medium text-emerald-600 hover:bg-emerald-50 dark:border-emerald-400 dark:text-emerald-400">New Request</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Form -->
+          <div x-show="!submitted">
+            <div class="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-900/20">
+              <p class="text-sm text-blue-700 dark:text-blue-300">Add image or URL (competitor site, AliExpress). We'll provide COGS within 24-48 hours.</p>
+            </div>
+
+            <!-- Table -->
+            <div class="bg-white rounded-lg shadow dark:bg-gray-800">
+              <table class="w-full table-auto">
+                <thead class="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                  <tr>
+                    <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Img</th>
+                    <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Product Name</th>
+                    <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">URL / Ref</th>
+                    <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">To</th>
+                    <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Qty</th>
+                    <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Type</th>
+                    <th class="px-2 py-2"></th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                  <template x-for="(p, i) in products" :key="p.id">
+                    <tr>
+                      <!-- Image -->
+                      <td class="px-2 py-2">
+                        <template x-if="!p.imagePreview">
+                          <label class="flex h-10 w-10 cursor-pointer items-center justify-center rounded border-2 border-dashed border-gray-300 hover:border-emerald-400 dark:border-gray-600">
+                            <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            <input type="file" accept="image/*" class="hidden" @change="handleImageUpload($event, i)">
+                          </label>
+                        </template>
+                        <template x-if="p.imagePreview">
+                          <div class="relative h-10 w-10">
+                            <img :src="p.imagePreview" class="h-10 w-10 rounded object-cover">
+                            <button @click="removeImage(i)" class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-white text-xs">×</button>
+                          </div>
+                        </template>
+                      </td>
+                      <!-- Name -->
+                      <td class="px-2 py-2">
+                        <input type="text" x-model="p.productName" placeholder="Name" class="w-full min-w-[120px] rounded border border-gray-300 px-2 py-1 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                      </td>
+                      <!-- URL -->
+                      <td class="px-2 py-2">
+                        <input type="text" x-model="p.productUrl" placeholder="https://..." class="w-full min-w-[140px] rounded border border-gray-300 px-2 py-1 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                      </td>
+                      <!-- Countries -->
+                      <td class="px-2 py-2">
+                        <div class="relative" @click.stop>
+                          <button @click="activeDropdown = activeDropdown === 'c'+i ? null : 'c'+i" class="flex items-center gap-1 rounded border border-gray-300 px-2 py-1 text-sm dark:border-gray-600 dark:bg-gray-700">
+                            <span x-text="getFlags(p.countries) || '—'"></span>
+                            <svg class="h-3 w-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                          </button>
+                          <div x-show="activeDropdown === 'c'+i" x-transition class="absolute left-0 z-50 mt-1 rounded border bg-white shadow-lg dark:border-gray-600 dark:bg-gray-700">
+                            <template x-for="c in countryOptions" :key="c.code">
+                              <label class="flex items-center gap-2 px-2 py-1 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer text-sm whitespace-nowrap">
+                                <input type="checkbox" :checked="p.countries.includes(c.code)" @change="toggleCountry(i, c.code)" class="h-3 w-3 rounded text-emerald-600">
+                                <span x-text="c.flag + ' ' + c.code"></span>
+                              </label>
+                            </template>
+                          </div>
+                        </div>
+                      </td>
+                      <!-- Qty -->
+                      <td class="px-2 py-2">
+                        <div class="relative" @click.stop>
+                          <button @click="activeDropdown = activeDropdown === 'q'+i ? null : 'q'+i" class="flex items-center gap-1 rounded border border-gray-300 px-2 py-1 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                            <span x-text="p.quantities.join(',') || '—'"></span>
+                            <svg class="h-3 w-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                          </button>
+                          <div x-show="activeDropdown === 'q'+i" x-transition class="absolute left-0 z-50 mt-1 rounded border bg-white shadow-lg dark:border-gray-600 dark:bg-gray-700">
+                            <template x-for="q in quantityOptions" :key="q">
+                              <label class="flex items-center gap-2 px-2 py-1 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer text-sm">
+                                <input type="checkbox" :checked="p.quantities.includes(q)" @change="toggleQty(i, q)" class="h-3 w-3 rounded text-emerald-600">
+                                <span x-text="q"></span>
+                              </label>
+                            </template>
+                          </div>
+                        </div>
+                      </td>
+                      <!-- Type -->
+                      <td class="px-2 py-2">
+                        <div class="flex gap-2 text-xs">
+                          <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" x-model="p.includeSingle" class="h-3 w-3 rounded text-emerald-600">S</label>
+                          <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" x-model="p.includeUpsell" class="h-3 w-3 rounded text-emerald-600">U</label>
+                        </div>
+                      </td>
+                      <!-- Remove -->
+                      <td class="px-2 py-2">
+                        <button @click="removeRow(i)" class="text-gray-400 hover:text-red-500" :disabled="products.length === 1" :class="{'opacity-30': products.length === 1}">
+                          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+              <div class="border-t border-gray-200 dark:border-gray-700 px-3 py-2">
+                <button @click="addRow()" class="flex items-center gap-1 text-sm font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                  Add Product
+                </button>
+              </div>
+            </div>
+
+            <!-- Summary -->
+            <div class="mt-4 flex items-center justify-between rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 dark:border-emerald-800 dark:bg-emerald-900/20">
+              <span class="text-sm text-emerald-700 dark:text-emerald-300">
+                <span class="font-semibold" x-text="validCount"></span> product(s) · <span class="font-semibold" x-text="totalPricePoints"></span> price points · 24-48h
+              </span>
+              <button @click="submit()" :disabled="submitting || !validCount" class="rounded-lg bg-emerald-600 px-5 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50">
+                <span x-show="!submitting">Submit</span>
+                <span x-show="submitting">Submitting...</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <footer class="mt-auto border-t border-gray-200 bg-white py-4 dark:border-gray-700 dark:bg-gray-800">
+        <div class="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+          <span>© 2025 Innovativa</span>
+          <a href="#" class="hover:text-gray-700 dark:hover:text-gray-300">Help</a>
+        </div>
+      </footer>
+    </div>
+  <script defer src="bundle.js"></script></body>
+</html>
